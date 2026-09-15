@@ -1,7 +1,10 @@
 import { useRoute } from './router';
 import { TabBar } from './components/TabBar';
 import { Fab } from './components/Fab';
+import { ToastHost } from './components/Toast';
 import { KidsScreen } from './screens/Kids';
+import { ChildEditScreen } from './screens/ChildEdit';
+import { ChildProfileScreen } from './screens/ChildProfile';
 import { RecordsScreen } from './screens/Records';
 import { StatsScreen } from './screens/Stats';
 import { SettingsScreen } from './screens/Settings';
@@ -9,12 +12,16 @@ import { NotFoundScreen } from './screens/NotFound';
 
 function Screen() {
   const r = useRoute();
-  const [root] = r.segments;
+  const [root, second, third] = r.segments;
   switch (root) {
     case undefined:
     case '':
-    case 'kids':
       return <KidsScreen />;
+    case 'kids':
+      if (!second) return <KidsScreen />;
+      if (second === 'new') return <ChildEditScreen key="new" />;
+      if (third === 'edit') return <ChildEditScreen key={second} childId={second} />;
+      return <ChildProfileScreen childId={second} />;
     case 'records':
       return <RecordsScreen />;
     case 'stats':
@@ -28,9 +35,9 @@ function Screen() {
 
 /** Full-screen flows (editors, builders) hide the tab bar and FAB. */
 function isFullScreen(segments: string[]): boolean {
-  const [root, , third] = segments;
+  const [root, second, third] = segments;
   if (root === 'new' || root === 'edit') return true;
-  if (root === 'kids' && (segments[1] === 'new' || third === 'edit' || third === 'avatar')) return true;
+  if (root === 'kids' && (second === 'new' || third === 'edit' || third === 'avatar')) return true;
   return false;
 }
 
@@ -48,6 +55,7 @@ export function App() {
           <TabBar />
         </>
       )}
+      <ToastHost />
     </div>
   );
 }
