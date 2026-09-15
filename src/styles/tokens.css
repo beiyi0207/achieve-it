@@ -1,0 +1,77 @@
+:root {
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --surface-2: #eef0f6;
+  --border: #dde1ea;
+  --text: #171a22;
+  --text-2: #5b6272;
+  --text-3: #8a90a0;
+  --accent: #2f6fed;
+  --accent-text: #ffffff;
+  --accent-soft: #e4ecfd;
+  --danger: #d6455d;
+  --danger-soft: #fbe5e9;
+  --warn: #b7791f;
+  --warn-soft: #fdf1dc;
+  --success: #2e8b57;
+  --shadow: 0 1px 2px rgba(23, 26, 34, 0.06), 0 4px 12px rgba(23, 26, 34, 0.06);
+  --shadow-lg: 0 8px 24px rgba(23, 26, 34, 0.16);
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-pill: 999px;
+  --tap: 44px;
+  --gutter: 16px;
+  --tabbar-h: 64px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-t: env(safe-area-inset-top, 0px);
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #12141b;
+    --surface: #1c1f29;
+    --surface-2: #262a37;
+    --border: #333849;
+    --text: #eef0f6;
+    --text-2: #aab0c0;
+    --text-3: #7a8094;
+    --accent: #6a95f5;
+    --accent-text: #0d1220;
+    --accent-soft: #23304d;
+    --danger: #ef6b81;
+    --danger-soft: #3d2129;
+    --warn: #e2a33a;
+    --warn-soft: #3b2f18;
+    --success: #5cc48a;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #12141b;
+  --surface: #1c1f29;
+  --surface-2: #262a37;
+  --border: #333849;
+  --text: #eef0f6;
+  --text-2: #aab0c0;
+  --text-3: #7a8094;
+  --accent: #6a95f5;
+  --accent-text: #0d1220;
+  --accent-soft: #23304d;
+  --danger: #ef6b81;
+  --danger-soft: #3d2129;
+  --warn: #e2a33a;
+  --warn-soft: #3b2f18;
+  --success: #5cc48a;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
