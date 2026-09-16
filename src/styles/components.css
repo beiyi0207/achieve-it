@@ -946,3 +946,39 @@ dialog::backdrop {
 .list-row.list-row--button {
   cursor: pointer;
 }
+
+/* ---------- Child profile ---------- */
+.profile-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  text-align: center;
+}
+
+.profile-hero .avatar {
+  box-shadow:
+    0 0 0 4px var(--surface),
+    0 0 0 7px var(--ring, var(--accent));
+}
+
+.timeline .section-title {
+  padding-top: 8px;
+}
+
+.timeline-row {
+  position: relative;
+  padding-left: 22px;
+}
+
+.timeline-row::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 12px;
+  bottom: 12px;
+  width: 4px;
+  border-radius: 2px;
+  background: var(--bar, var(--accent));
+}
