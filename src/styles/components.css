@@ -592,11 +592,15 @@ dialog::backdrop {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(var(--tabbar-h) + var(--safe-b) + 16px);
+  bottom: calc(var(--tabbar-h) + var(--safe-b) + 48px);
   display: flex;
   justify-content: center;
   pointer-events: none;
   z-index: 30;
+}
+
+.app--full .toast-host {
+  bottom: calc(var(--safe-b) + 24px);
 }
 
 .toast {
@@ -638,4 +642,244 @@ dialog::backdrop {
 
 .swipe-row--dragging .swipe-row__content {
   transition: none;
+}
+
+/* ---------- Markdown editor ---------- */
+.md-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.md-toolbar {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.md-toolbar::-webkit-scrollbar {
+  display: none;
+}
+
+.md-tool {
+  min-width: 44px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  font-weight: 700;
+  font-size: 14px;
+  flex: 0 0 auto;
+}
+
+.md-tool--italic {
+  font-style: italic;
+  font-family: Georgia, serif;
+}
+
+.md-tool:active {
+  background: var(--accent-soft);
+}
+
+.markdown {
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.markdown > :first-child {
+  margin-top: 0;
+}
+
+.markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown h1 {
+  font-size: 22px;
+  margin: 16px 0 8px;
+}
+
+.markdown h2 {
+  font-size: 18px;
+  margin: 14px 0 6px;
+}
+
+.markdown h3,
+.markdown h4 {
+  font-size: 16px;
+  margin: 12px 0 4px;
+}
+
+.markdown p,
+.markdown ul,
+.markdown ol,
+.markdown blockquote,
+.markdown pre {
+  margin: 0 0 10px;
+}
+
+.markdown ul,
+.markdown ol {
+  padding-left: 22px;
+}
+
+.markdown blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: 12px;
+  color: var(--text-2);
+}
+
+.markdown code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  background: var(--surface-2);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.markdown pre {
+  background: var(--surface-2);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  overflow-x: auto;
+}
+
+.markdown pre code {
+  background: none;
+  padding: 0;
+}
+
+.markdown a {
+  text-decoration: underline;
+}
+
+.markdown table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.markdown th,
+.markdown td {
+  border: 1px solid var(--border);
+  padding: 4px 8px;
+  text-align: left;
+}
+
+/* ---------- Tag input ---------- */
+.tag-input-wrap {
+  position: relative;
+}
+
+.tag-input {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: text;
+}
+
+.tag-input:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.tag-input input {
+  flex: 1;
+  min-width: 100px;
+  border: 0;
+  outline: none;
+  background: none;
+  min-height: 34px;
+}
+
+.suggestions {
+  margin-top: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.suggestions button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0 14px;
+  min-height: 44px;
+  text-align: left;
+  color: var(--text);
+}
+
+.suggestions button + button {
+  border-top: 1px solid var(--border);
+}
+
+.suggestions button:active {
+  background: var(--surface-2);
+}
+
+.chip__count {
+  opacity: 0.75;
+  font-weight: 500;
+}
+
+.tag-chip--active {
+  outline: 2px solid var(--tag);
+  outline-offset: -1px;
+}
+
+/* ---------- Child picker ---------- */
+.child-picker {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 6px 0;
+  scrollbar-width: none;
+}
+
+.child-picker::-webkit-scrollbar {
+  display: none;
+}
+
+.child-picker__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 76px;
+  padding: 4px;
+  font-size: 12px;
+  color: var(--text-2);
+  border-radius: var(--radius);
+  flex: 0 0 auto;
+  max-width: 96px;
+}
+
+.child-picker__item span {
+  max-width: 100%;
+}
+
+.child-picker__item .avatar {
+  box-shadow: 0 0 0 3px transparent;
+  transition: box-shadow 0.12s;
+}
+
+.child-picker__item[aria-checked='true'] {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.child-picker__item[aria-checked='true'] .avatar {
+  box-shadow:
+    0 0 0 3px var(--surface),
+    0 0 0 6px var(--ring, var(--accent));
 }

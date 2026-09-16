@@ -45,6 +45,12 @@ export function formatDate(iso: string, opts: Intl.DateTimeFormatOptions = { day
   return parseIso(iso).toLocaleDateString(undefined, opts);
 }
 
+/** Format an ISO date-time in the user's local zone as a date. */
+export function formatDateTime(isoDateTime: string, opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' }): string {
+  const d = new Date(isoDateTime);
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString(undefined, opts);
+}
+
 export function daysBetween(fromIso: string, toIso: string): number {
   const a = parseIso(fromIso).getTime();
   const b = parseIso(toIso).getTime();

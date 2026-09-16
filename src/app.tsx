@@ -6,6 +6,8 @@ import { KidsScreen } from './screens/Kids';
 import { ChildEditScreen } from './screens/ChildEdit';
 import { ChildProfileScreen } from './screens/ChildProfile';
 import { RecordsScreen } from './screens/Records';
+import { RecordDetailScreen } from './screens/RecordDetail';
+import { AchievementEditorScreen } from './screens/AchievementEditor';
 import { StatsScreen } from './screens/Stats';
 import { SettingsScreen } from './screens/Settings';
 import { NotFoundScreen } from './screens/NotFound';
@@ -23,7 +25,13 @@ function Screen() {
       if (third === 'edit') return <ChildEditScreen key={second} childId={second} />;
       return <ChildProfileScreen childId={second} />;
     case 'records':
+      if (second) return <RecordDetailScreen achievementId={second} />;
       return <RecordsScreen />;
+    case 'new':
+      return <AchievementEditorScreen key="new" />;
+    case 'edit':
+      if (!second) return <NotFoundScreen />;
+      return <AchievementEditorScreen key={second} achievementId={second} />;
     case 'stats':
       return <StatsScreen />;
     case 'settings':
