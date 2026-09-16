@@ -4,9 +4,10 @@ import { ChildPicker } from '../components/ChildPicker';
 import { TagInput } from '../components/TagInput';
 import { MarkdownEditor } from '../components/MarkdownEditor';
 import { ConfirmDialog } from '../components/Dialog';
-import { achievements, addAchievement, removeAchievement, toast, updateAchievement } from '../store';
+import { achievements, addAchievement, childById, removeAchievement, toast, updateAchievement } from '../store';
 import { back, navigate, useRoute } from '../router';
 import { isValidIsoDate, todayIso } from '../lib/dates';
+import { recordsHref } from '../lib/filters';
 
 type Props = { achievementId?: string };
 
@@ -15,11 +16,24 @@ export function AchievementEditorScreen({ achievementId }: Props) {
   const existing = achievementId ? achievements.value.find((a) => a.id === achievementId) : undefined;
   const isEdit = !!achievementId;
 
-  const [childId, setChildId] = useState<string | null>(existing?.childId ?? route.query.get('child') ?? null);
-  const [title, setTitle] = useState(existing?.title ?? '');
-  const [date, setDate] = useState(existing?.date ?? todayIso());
-  const [tagIds, setTagIds] = useState<string[]>(existing?.tags ?? []);
-  const [description, setDescription] = useState(existing?.description ?? '');
+  // "Duplicate" opens the editor as a new record pre-filled from another one.
+  const fromId = !isEdit ? route.query.get('from') : null;
+  const source = fromId ? achievements.value.find((a) => a.id === fromId) : undefined;
+  const template = existing ?? source;
+
+  const initialChildren = (): string[] => {
+    if (existing) return [existing.childId];
+    const preset = route.query.get('child');
+    if (preset && childById.value.has(preset)) return [preset];
+    if (source && childById.value.has(source.childId)) return [source.childId];
+    return [];
+  };
+
+  const [childIds, setChildIds] = useState<string[]>(initialChildren);
+  const [title, setTitle] = useState(template?.title ?? '');
+  const [date, setDate] = useState(template?.date ?? todayIso());
+  const [tagIds, setTagIds] = useState<string[]>(template?.tags ?? []);
+  const [description, setDescription] = useState(template?.description ?? '');
   const [errors, setErrors] = useState<{ title?: string; child?: string; date?: string }>({});
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -38,7 +52,7 @@ export function AchievementEditorScreen({ achievementId }: Props) {
   function validate(): boolean {
     const e: typeof errors = {};
     if (!title.trim()) e.title = 'Give this achievement a title.';
-    if (!childId) e.child = 'Choose a kid.';
+    if (childIds.length === 0) e.child = isEdit ? 'Choose a kid.' : 'Choose at least one kid.';
     if (!isValidIsoDate(date)) e.date = 'Enter a valid date.';
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -48,15 +62,21 @@ export function AchievementEditorScreen({ achievementId }: Props) {
     if (saving || !validate()) return;
     setSaving(true);
     try {
-      const data = { childId: childId!, title: title.trim(), date, tags: tagIds, description };
+      const base = { title: title.trim(), date, tags: tagIds, description };
       if (existing) {
-        await updateAchievement({ ...existing, ...data });
+        await updateAchievement({ ...existing, ...base, childId: childIds[0] });
         toast('Achievement updated');
         navigate(`/records/${existing.id}`, { replace: true });
-      } else {
-        const a = await addAchievement(data);
+        return;
+      }
+      const created = [];
+      for (const childId of childIds) created.push(await addAchievement({ ...base, childId }));
+      if (created.length === 1) {
         toast('Achievement saved');
-        navigate(`/records/${a.id}`, { replace: true });
+        navigate(`/records/${created[0].id}`, { replace: true });
+      } else {
+        toast(`Saved for ${created.length} kids`);
+        navigate(recordsHref({ childIds, range: 'custom', from: date, to: date }).slice(1), { replace: true });
       }
     } finally {
       setSaving(false);
@@ -65,14 +85,17 @@ export function AchievementEditorScreen({ achievementId }: Props) {
 
   function cancel() {
     if (existing) navigate(`/records/${existing.id}`, { replace: true });
+    else if (source) navigate(`/records/${source.id}`, { replace: true });
     else back('/records');
   }
+
+  const saveLabel = isEdit ? 'Save changes' : childIds.length > 1 ? `Save for ${childIds.length} kids` : 'Save achievement';
 
   return (
     <>
       <Header
         variant="centered"
-        title={isEdit ? 'Edit achievement' : 'New achievement'}
+        title={isEdit ? 'Edit achievement' : source ? 'Duplicate achievement' : 'New achievement'}
         left={
           <button type="button" class="text-btn" onClick={cancel}>
             Cancel
@@ -92,8 +115,9 @@ export function AchievementEditorScreen({ achievementId }: Props) {
         }}
       >
         <div class="field">
-          <span class="field__label">Kid</span>
-          <ChildPicker value={childId} onChange={setChildId} />
+          <span class="field__label">{isEdit ? 'Kid' : 'Kids'}</span>
+          <ChildPicker value={childIds} onChange={setChildIds} multiple={!isEdit} />
+          {!isEdit && childIds.length > 1 && <p class="muted small">A separate record is saved for each kid.</p>}
           {errors.child && <div class="field__error">{errors.child}</div>}
         </div>
 
@@ -127,7 +151,7 @@ export function AchievementEditorScreen({ achievementId }: Props) {
         </div>
 
         <button type="submit" class="btn btn--primary" disabled={saving}>
-          {isEdit ? 'Save changes' : 'Save achievement'}
+          {saveLabel}
         </button>
 
         {existing && (

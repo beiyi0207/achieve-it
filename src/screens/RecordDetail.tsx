@@ -2,7 +2,7 @@ import { useMemo } from 'preact/hooks';
 import { Header } from '../components/Header';
 import { Avatar } from '../components/Avatar';
 import { TagChip } from '../components/TagChip';
-import { IconBack, IconEdit } from '../components/Icons';
+import { IconBack, IconCopy, IconEdit } from '../components/Icons';
 import { achievements, childById, childName, tagById } from '../store';
 import { back } from '../router';
 import { formatDate, formatDateTime } from '../lib/dates';
@@ -17,7 +17,15 @@ export function RecordDetailScreen({ achievementId }: Props) {
   if (!a) {
     return (
       <>
-        <Header variant="centered" title="Record" left={<a class="icon-btn" href="#/records" aria-label="Back"><IconBack /></a>} />
+        <Header
+          variant="centered"
+          title="Record"
+          left={
+            <a class="icon-btn" href="#/records" aria-label="Back">
+              <IconBack />
+            </a>
+          }
+        />
         <div class="container">
           <p class="muted">This record no longer exists.</p>
         </div>
@@ -39,9 +47,14 @@ export function RecordDetailScreen({ achievementId }: Props) {
           </button>
         }
         right={
-          <a class="icon-btn" href={`#/edit/${a.id}`} aria-label="Edit achievement">
-            <IconEdit />
-          </a>
+          <>
+            <a class="icon-btn" href={`#/new?from=${a.id}`} aria-label="Duplicate achievement" title="Duplicate">
+              <IconCopy />
+            </a>
+            <a class="icon-btn" href={`#/edit/${a.id}`} aria-label="Edit achievement" title="Edit">
+              <IconEdit />
+            </a>
+          </>
         }
       />
       <div class="container stack">
@@ -61,6 +74,9 @@ export function RecordDetailScreen({ achievementId }: Props) {
           </div>
         )}
         {html ? <div class="markdown card" dangerouslySetInnerHTML={{ __html: html }} /> : <p class="muted">No description.</p>}
+        <a class="btn" href={`#/new?from=${a.id}`}>
+          <IconCopy size={18} /> Duplicate for another kid or day
+        </a>
         <p class="muted small">
           Added {formatDateTime(a.createdAt)}
           {a.updatedAt !== a.createdAt && <> · Updated {formatDateTime(a.updatedAt)}</>}

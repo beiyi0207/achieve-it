@@ -150,3 +150,10 @@ export const IconCalendar = ({ size = 20, ...r }: IconProps) => (
     <path d="M3 10h18M8 3v4M16 3v4" />
   </svg>
 );
+
+export const IconCopy = ({ size = 24, ...r }: IconProps) => (
+  <svg {...base(size, r)}>
+    <rect x="9" y="9" width="11" height="11" rx="2" />
+    <path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3" />
+  </svg>
+);
