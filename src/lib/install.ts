@@ -11,6 +11,15 @@ let deferred: BeforeInstallPromptEvent | null = null;
 export const installAvailable = signal(false);
 export const installed = signal(false);
 
+/** iOS Safari never fires beforeinstallprompt; installing is a manual "Add to Home Screen". */
+export function isIosSafari(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  const isIos = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+  return isIos && isSafari;
+}
+
 export function isStandalone(): boolean {
   if (typeof window === 'undefined') return false;
   const nav = navigator as Navigator & { standalone?: boolean };

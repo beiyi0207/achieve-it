@@ -6,7 +6,7 @@ import { IconChevron } from '../components/Icons';
 import { achievements, children, eraseAllData, replaceAllData, settings, snapshot, tags, toast, updateSettings } from '../store';
 import { daysSince } from '../lib/dates';
 import { mergeSnapshots, parseBackup, readFileText } from '../lib/import';
-import { installAvailable, installed, promptInstall } from '../lib/install';
+import { installAvailable, installed, isIosSafari, promptInstall } from '../lib/install';
 import { ExportSheet } from './ExportSheet';
 import type { Appearance, DataSnapshot, GroupBy, SortDirection, SortKey } from '../types';
 
@@ -19,11 +19,13 @@ export function SettingsScreen() {
   const [pendingImport, setPendingImport] = useState<DataSnapshot | null>(null);
   const [eraseOpen, setEraseOpen] = useState(false);
   const [eraseText, setEraseText] = useState('');
+  const [iosHintOpen, setIosHintOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const days = s.lastExportAt ? daysSince(s.lastExportAt) : null;
   const needsBackup = (recordCount > 0 || kidCount > 0) && (days === null || days >= s.backupReminderDays);
   const showInstall = !installed.value && installAvailable.value;
+  const showIosHint = !installed.value && !installAvailable.value && isIosSafari();
 
   async function onFile(e: Event) {
     const input = e.target as HTMLInputElement;
@@ -116,6 +118,15 @@ export function SettingsScreen() {
         <div class="list">
           {showInstall && (
             <button type="button" class="list-row" onClick={install}>
+              <div class="grow">
+                <div class="list-row__title">Install app</div>
+                <div class="list-row__sub">Add to your home screen and use it offline.</div>
+              </div>
+              <IconChevron class="chevron" />
+            </button>
+          )}
+          {showIosHint && (
+            <button type="button" class="list-row" onClick={() => setIosHintOpen(true)}>
               <div class="grow">
                 <div class="list-row__title">Install app</div>
                 <div class="list-row__sub">Add to your home screen and use it offline.</div>
@@ -263,6 +274,21 @@ export function SettingsScreen() {
           },
         ]}
       />
+
+      <Dialog open={iosHintOpen} onClose={() => setIosHintOpen(false)} label="Install on iPhone or iPad">
+        <h2>Install on iPhone or iPad</h2>
+        <ol class="steps">
+          <li>Tap the Share button at the bottom of Safari.</li>
+          <li>Scroll down and tap “Add to Home Screen”.</li>
+          <li>Tap “Add”. The app opens full screen and works offline.</li>
+        </ol>
+        <p class="muted small">Your data stays in Safari on this device. Keep exporting backups from Settings.</p>
+        <div class="dialog__actions">
+          <button type="button" class="btn btn--primary" onClick={() => setIosHintOpen(false)}>
+            Got it
+          </button>
+        </div>
+      </Dialog>
 
       <Dialog open={eraseOpen} onClose={() => setEraseOpen(false)} label="Erase all data">
         <h2>Erase all data?</h2>
