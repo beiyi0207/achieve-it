@@ -11,6 +11,8 @@ import { RecordDetailScreen } from './screens/RecordDetail';
 import { AchievementEditorScreen } from './screens/AchievementEditor';
 import { StatsScreen } from './screens/Stats';
 import { SettingsScreen } from './screens/Settings';
+import { ManageTagsScreen } from './screens/ManageTags';
+import { TermDatesScreen } from './screens/TermDates';
 import { NotFoundScreen } from './screens/NotFound';
 
 function Screen() {
@@ -37,6 +39,8 @@ function Screen() {
     case 'stats':
       return <StatsScreen />;
     case 'settings':
+      if (second === 'tags') return <ManageTagsScreen />;
+      if (second === 'terms') return <TermDatesScreen />;
       return <SettingsScreen />;
     default:
       return <NotFoundScreen />;

@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitest/config';
 import preact from '@preact/preset-vite';
 import { VitePWA } from 'vite-plugin-pwa';
-import pkg from './package.json';
+import pkg from './package.json' with { type: 'json' };
 
 const base = process.env.VITE_BASE ?? '/';
 
@@ -36,6 +36,19 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            { name: 'dicebear', test: /node_modules[\\/]@dicebear/ },
+            { name: 'markdown', test: /node_modules[\\/](marked|dompurify)/ },
+          ],
+        },
+      },
+    },
+  },
   test: {
     environment: 'node',
     include: ['tests/**/*.test.ts'],

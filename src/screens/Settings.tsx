@@ -1,23 +1,29 @@
 import { useRef, useState } from 'preact/hooks';
 import { Header } from '../components/Header';
-import { ConfirmDialog } from '../components/Dialog';
+import { ConfirmDialog, Dialog } from '../components/Dialog';
+import { SegmentedControl } from '../components/SegmentedControl';
 import { IconChevron } from '../components/Icons';
-import { achievements, children, replaceAllData, settings, snapshot, toast, updateSettings } from '../store';
+import { achievements, children, eraseAllData, replaceAllData, settings, snapshot, tags, toast, updateSettings } from '../store';
 import { daysSince } from '../lib/dates';
 import { mergeSnapshots, parseBackup, readFileText } from '../lib/import';
+import { installAvailable, installed, promptInstall } from '../lib/install';
 import { ExportSheet } from './ExportSheet';
-import type { DataSnapshot } from '../types';
+import type { Appearance, DataSnapshot, GroupBy, SortDirection, SortKey } from '../types';
 
 export function SettingsScreen() {
   const s = settings.value;
   const kidCount = children.value.length;
   const recordCount = achievements.value.length;
+  const tagCount = tags.value.length;
   const [exportOpen, setExportOpen] = useState(false);
   const [pendingImport, setPendingImport] = useState<DataSnapshot | null>(null);
+  const [eraseOpen, setEraseOpen] = useState(false);
+  const [eraseText, setEraseText] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
   const days = s.lastExportAt ? daysSince(s.lastExportAt) : null;
   const needsBackup = (recordCount > 0 || kidCount > 0) && (days === null || days >= s.backupReminderDays);
+  const showInstall = !installed.value && installAvailable.value;
 
   async function onFile(e: Event) {
     const input = e.target as HTMLInputElement;
@@ -34,6 +40,12 @@ export function SettingsScreen() {
     } catch {
       toast('Could not read that file.', 4000);
     }
+  }
+
+  async function install() {
+    const r = await promptInstall();
+    if (r === 'accepted') toast('App installed');
+    else if (r === 'unavailable') toast('Install is not available in this browser.');
   }
 
   return (
@@ -87,6 +99,128 @@ export function SettingsScreen() {
           </label>
         </div>
 
+        <h2 class="section-title">Tags</h2>
+        <div class="list">
+          <a class="list-row" href="#/settings/tags">
+            <div class="grow">
+              <div class="list-row__title">Manage tags</div>
+              <div class="list-row__sub">
+                {tagCount} {tagCount === 1 ? 'tag' : 'tags'} · rename, recolour, merge or delete
+              </div>
+            </div>
+            <IconChevron class="chevron" />
+          </a>
+        </div>
+
+        <h2 class="section-title">App</h2>
+        <div class="list">
+          {showInstall && (
+            <button type="button" class="list-row" onClick={install}>
+              <div class="grow">
+                <div class="list-row__title">Install app</div>
+                <div class="list-row__sub">Add to your home screen and use it offline.</div>
+              </div>
+              <IconChevron class="chevron" />
+            </button>
+          )}
+          <div class="list-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
+            <div class="list-row__title">Appearance</div>
+            <SegmentedControl<Appearance>
+              value={s.appearance}
+              onChange={(appearance) => updateSettings({ appearance })}
+              options={[
+                { value: 'system', label: 'System' },
+                { value: 'light', label: 'Light' },
+                { value: 'dark', label: 'Dark' },
+              ]}
+              label="Appearance"
+            />
+          </div>
+          <div class="list-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
+            <div class="list-row__title">Default record view</div>
+            <div class="row">
+              <label class="field grow">
+                <span class="field__label">Sort by</span>
+                <select
+                  class="select"
+                  value={s.defaultRecordView.sort}
+                  onChange={(e) => updateSettings({ defaultRecordView: { ...s.defaultRecordView, sort: (e.target as HTMLSelectElement).value as SortKey } })}
+                >
+                  <option value="date">Date</option>
+                  <option value="child">Child</option>
+                  <option value="tag">Tag</option>
+                </select>
+              </label>
+              <label class="field grow">
+                <span class="field__label">Direction</span>
+                <select
+                  class="select"
+                  value={s.defaultRecordView.direction}
+                  onChange={(e) =>
+                    updateSettings({ defaultRecordView: { ...s.defaultRecordView, direction: (e.target as HTMLSelectElement).value as SortDirection } })
+                  }
+                >
+                  <option value="desc">{s.defaultRecordView.sort === 'date' ? 'Newest first' : 'Z to A'}</option>
+                  <option value="asc">{s.defaultRecordView.sort === 'date' ? 'Oldest first' : 'A to Z'}</option>
+                </select>
+              </label>
+            </div>
+            <label class="field">
+              <span class="field__label">Group by</span>
+              <select class="select" value={s.groupBy} onChange={(e) => updateSettings({ groupBy: (e.target as HTMLSelectElement).value as GroupBy })}>
+                <option value="date">Date</option>
+                <option value="child">Child</option>
+                <option value="tag">Tag</option>
+                <option value="none">None</option>
+              </select>
+            </label>
+          </div>
+          <div class="list-row">
+            <div class="grow">
+              <div class="list-row__title">Show ages on cards</div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              class="toggle"
+              aria-checked={s.showAges}
+              aria-label="Show ages on cards"
+              onClick={() => updateSettings({ showAges: !s.showAges })}
+            />
+          </div>
+          <a class="list-row" href="#/settings/terms">
+            <div class="grow">
+              <div class="list-row__title">Term dates</div>
+              <div class="list-row__sub">
+                {s.termDates?.length ? `${s.termDates.length} ${s.termDates.length === 1 ? 'term' : 'terms'} set` : 'For teachers. Enables the “This term” range.'}
+              </div>
+            </div>
+            <IconChevron class="chevron" />
+          </a>
+        </div>
+
+        <h2 class="section-title" style={{ color: 'var(--danger)' }}>
+          Danger zone
+        </h2>
+        <div class="list">
+          <button
+            type="button"
+            class="list-row"
+            onClick={() => {
+              setEraseText('');
+              setEraseOpen(true);
+            }}
+          >
+            <div class="grow">
+              <div class="list-row__title" style={{ color: 'var(--danger)' }}>
+                Erase all data
+              </div>
+              <div class="list-row__sub">Deletes every kid, record, tag and setting from this browser.</div>
+            </div>
+            <IconChevron class="chevron" />
+          </button>
+        </div>
+
         <p class="muted small" style={{ textAlign: 'center' }}>
           Version {__APP_VERSION__} · {kidCount} {kidCount === 1 ? 'kid' : 'kids'} · {recordCount} {recordCount === 1 ? 'record' : 'records'}
         </p>
@@ -129,6 +263,35 @@ export function SettingsScreen() {
           },
         ]}
       />
+
+      <Dialog open={eraseOpen} onClose={() => setEraseOpen(false)} label="Erase all data">
+        <h2>Erase all data?</h2>
+        <p class="muted small">
+          This deletes {kidCount} {kidCount === 1 ? 'kid' : 'kids'} and {recordCount} {recordCount === 1 ? 'record' : 'records'} from this browser. It cannot be undone.
+          Export a backup first if you might want them back.
+        </p>
+        <div class="field">
+          <label for="erase-confirm">Type “erase” to confirm</label>
+          <input id="erase-confirm" class="input" value={eraseText} onInput={(e) => setEraseText((e.target as HTMLInputElement).value)} autocomplete="off" autoCapitalize="off" />
+        </div>
+        <div class="dialog__actions">
+          <button
+            type="button"
+            class="btn btn--danger"
+            disabled={eraseText.trim().toLowerCase() !== 'erase'}
+            onClick={async () => {
+              await eraseAllData();
+              setEraseOpen(false);
+              toast('All data erased');
+            }}
+          >
+            Erase everything
+          </button>
+          <button type="button" class="btn btn--ghost" onClick={() => setEraseOpen(false)}>
+            Cancel
+          </button>
+        </div>
+      </Dialog>
     </>
   );
 }

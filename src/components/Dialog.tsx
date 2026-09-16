@@ -13,12 +13,19 @@ type DialogProps = {
 /** Native <dialog> wrapper. Closes on backdrop tap and Escape. */
 export function Dialog({ open, onClose, variant = 'center', label, children }: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
+  // Set while we close the element because `open` became false, so the native
+  // close event does not call onClose a second time (which would clobber state
+  // a parent set right before closing, e.g. switching to another sheet).
+  const closingByProp = useRef(false);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     if (open && !el.open) el.showModal();
-    else if (!open && el.open) el.close();
+    else if (!open && el.open) {
+      closingByProp.current = true;
+      el.close();
+    }
   }, [open]);
 
   return (
@@ -26,7 +33,13 @@ export function Dialog({ open, onClose, variant = 'center', label, children }: D
       ref={ref}
       class={variant === 'sheet' ? 'sheet' : 'dialog'}
       aria-label={label}
-      onClose={onClose}
+      onClose={() => {
+        if (closingByProp.current) {
+          closingByProp.current = false;
+          return;
+        }
+        onClose();
+      }}
       onCancel={(e) => {
         e.preventDefault();
         onClose();
