@@ -441,13 +441,13 @@ button.chip {
 .input[type='date'] {
   -webkit-appearance: none;
   appearance: none;
-  display: block;
+  display: flex;
+  align-items: center;
   width: 100%;
   min-width: 0;
   height: 48px;
   min-height: 48px;
   padding: 0 14px;
-  line-height: 1;
   background-color: var(--surface);
   color: var(--text);
   box-sizing: border-box;
@@ -455,8 +455,8 @@ button.chip {
 
 .input[type='date']::-webkit-date-and-time-value {
   padding: 0;
-  line-height: 1;
-  color: var(--text);
+  display: inline-block;
+  vertical-align: center;
 }
 
 .input[type='date']::-webkit-datetime-edit {
