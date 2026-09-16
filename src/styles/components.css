@@ -435,6 +435,44 @@ button.chip {
   outline: none;
 }
 
+/* iOS Safari sizes date inputs intrinsically (inline-flex, centred value),
+   which makes them wider and taller than neighbouring text inputs. Force the
+   same box as .input. */
+.input[type='date'] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  min-height: 48px;
+  padding: 0 14px;
+  line-height: 46px;
+  text-align: left;
+  background-color: var(--surface);
+  color: var(--text);
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.input[type='date']::-webkit-date-and-time-value {
+  text-align: left;
+  margin: 0;
+  min-height: 1.2em;
+  line-height: 1.2em;
+}
+
+.input[type='date']::-webkit-datetime-edit {
+  padding: 0;
+  line-height: normal;
+}
+
+.input[type='date']::-webkit-calendar-picker-indicator {
+  color: var(--text-2);
+  opacity: 0.8;
+  cursor: pointer;
+}
+
 .input:focus,
 .textarea:focus,
 .select:focus {
