@@ -5,6 +5,7 @@ import { ToastHost } from './components/Toast';
 import { KidsScreen } from './screens/Kids';
 import { ChildEditScreen } from './screens/ChildEdit';
 import { ChildProfileScreen } from './screens/ChildProfile';
+import { AvatarBuilderScreen } from './screens/AvatarBuilder';
 import { RecordsScreen } from './screens/Records';
 import { RecordDetailScreen } from './screens/RecordDetail';
 import { AchievementEditorScreen } from './screens/AchievementEditor';
@@ -23,6 +24,7 @@ function Screen() {
       if (!second) return <KidsScreen />;
       if (second === 'new') return <ChildEditScreen key="new" />;
       if (third === 'edit') return <ChildEditScreen key={second} childId={second} />;
+      if (third === 'avatar') return <AvatarBuilderScreen key={second} childId={second} />;
       return <ChildProfileScreen childId={second} />;
     case 'records':
       if (second) return <RecordDetailScreen achievementId={second} />;
