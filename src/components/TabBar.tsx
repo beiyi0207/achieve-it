@@ -1,4 +1,5 @@
 import { useRoute } from '../router';
+import { L } from '../store';
 import { IconKids, IconRecords, IconStats, IconSettings } from './Icons';
 
 const tabs = [
@@ -24,7 +25,7 @@ export function TabBar() {
               aria-current={active === t.id ? 'page' : undefined}
             >
               <t.Icon size={24} />
-              <span>{t.label}</span>
+              <span>{t.id === 'kids' ? L.value.Many : t.label}</span>
             </a>
           </>
         ))}

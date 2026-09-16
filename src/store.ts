@@ -4,6 +4,7 @@ import { DEFAULT_SETTINGS, type Achievement, type Child, type DataSnapshot, type
 import { uuid } from './lib/ids';
 import { isoNow } from './lib/dates';
 import { nextTagColor } from './lib/palette';
+import { makeLabels } from './lib/labels';
 
 let store: DataStore = defaultDb;
 
@@ -18,6 +19,8 @@ export const tagById = computed(() => new Map(tags.value.map((t) => [t.id, t])))
 export const sortedChildren = computed(() =>
   [...children.value].sort((a, b) => `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`)),
 );
+/** Configurable words for the people being tracked; read as L.value.one / L.value.Many etc. */
+export const L = computed(() => makeLabels(settings.value.labels));
 export const sortedTags = computed(() => [...tags.value].sort((a, b) => a.name.localeCompare(b.name)));
 
 function applySnapshot(s: DataSnapshot) {
@@ -153,7 +156,7 @@ export function achievementsForChild(childId: string): Achievement[] {
 }
 
 export function childName(c: Child | undefined): string {
-  if (!c) return 'Unknown child';
+  if (!c) return `Unknown ${L.value.one}`;
   return `${c.firstName} ${c.lastName}`.trim();
 }
 

@@ -20,6 +20,8 @@ export type FilterContext = {
   tags: Map<string, Tag>;
   terms?: TermDate[];
   now?: Date;
+  /** Label for records whose child no longer exists; defaults to "Unknown child". */
+  unknownChildLabel?: string;
 };
 
 export const EMPTY_FILTER: RecordFilter = { q: '', childIds: [], tagIds: [], range: 'all' };
@@ -108,7 +110,7 @@ export function groupAchievements(list: Achievement[], groupBy: GroupBy, ctx: Fi
     } else if (groupBy === 'child') {
       const c = ctx.children.get(a.childId);
       key = a.childId;
-      title = c ? `${c.firstName} ${c.lastName}`.trim() : 'Unknown child';
+      title = c ? `${c.firstName} ${c.lastName}`.trim() : ctx.unknownChildLabel ?? 'Unknown child';
       color = c ? cssHex(c.avatar.background) : 'var(--text-3)';
       href = c ? `#/kids/${c.id}` : undefined;
     } else {

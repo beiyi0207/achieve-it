@@ -3,7 +3,7 @@ import { Header } from '../components/Header';
 import { Avatar } from '../components/Avatar';
 import { ConfirmDialog } from '../components/Dialog';
 import { IconShuffle } from '../components/Icons';
-import { addChild, childById, childName, removeChild, achievements, toast, updateChild } from '../store';
+import { L, achievements, addChild, childById, childName, removeChild, toast, updateChild } from '../store';
 import { navigate } from '../router';
 import { DEFAULT_STYLE, randomConfig, shuffleConfig } from '../lib/avatar';
 import type { AvatarConfig } from '../types';
@@ -31,9 +31,9 @@ export function ChildEditScreen({ childId }: Props) {
   if (isEdit && !existing) {
     return (
       <>
-        <Header variant="centered" title="Edit kid" left={<a class="text-btn" href="#/kids">Back</a>} />
+        <Header variant="centered" title={`Edit ${L.value.one}`} left={<a class="text-btn" href="#/kids">Back</a>} />
         <div class="container">
-          <p class="muted">This kid no longer exists.</p>
+          <p class="muted">This {L.value.one} no longer exists.</p>
         </div>
       </>
     );
@@ -55,7 +55,7 @@ export function ChildEditScreen({ childId }: Props) {
       const data = { firstName: firstName.trim(), lastName: lastName.trim(), age: Number(age), avatar: previewAvatar };
       if (existing) {
         await updateChild({ ...existing, ...data });
-        toast('Kid updated');
+        toast(`${L.value.One} updated`);
         navigate(`/kids/${existing.id}`, { replace: true });
       } else {
         const c = await addChild(data);
@@ -73,7 +73,7 @@ export function ChildEditScreen({ childId }: Props) {
     <>
       <Header
         variant="centered"
-        title={isEdit ? 'Edit kid' : 'New kid'}
+        title={isEdit ? `Edit ${L.value.one}` : `New ${L.value.one}`}
         left={
           <a class="text-btn" href={cancelHref}>
             Cancel
@@ -148,12 +148,12 @@ export function ChildEditScreen({ childId }: Props) {
         </div>
 
         <button type="submit" class="btn btn--primary" disabled={saving}>
-          {isEdit ? 'Save changes' : 'Add kid'}
+          {isEdit ? 'Save changes' : `Add ${L.value.one}`}
         </button>
 
         {existing && (
           <button type="button" class="btn btn--danger" onClick={() => setConfirmDelete(true)}>
-            Delete kid
+            Delete {L.value.one}
           </button>
         )}
       </form>
@@ -172,30 +172,30 @@ export function ChildEditScreen({ childId }: Props) {
             recordCount > 0
               ? [
                   {
-                    label: 'Delete kid and records',
+                    label: `Delete ${L.value.one} and records`,
                     kind: 'danger',
                     onClick: async () => {
                       await removeChild(existing.id, 'delete');
-                      toast('Kid and records deleted');
+                      toast(`${L.value.One} and records deleted`);
                       navigate('/kids', { replace: true });
                     },
                   },
                   {
-                    label: 'Delete kid, keep records',
+                    label: `Delete ${L.value.one}, keep records`,
                     onClick: async () => {
                       await removeChild(existing.id, 'keep');
-                      toast('Kid deleted. Records kept.');
+                      toast(`${L.value.One} deleted. Records kept.`);
                       navigate('/kids', { replace: true });
                     },
                   },
                 ]
               : [
                   {
-                    label: 'Delete kid',
+                    label: `Delete ${L.value.one}`,
                     kind: 'danger',
                     onClick: async () => {
                       await removeChild(existing.id, 'delete');
-                      toast('Kid deleted');
+                      toast(`${L.value.One} deleted`);
                       navigate('/kids', { replace: true });
                     },
                   },

@@ -1,4 +1,4 @@
-import { sortedChildren } from '../store';
+import { L, sortedChildren } from '../store';
 import { cssHex } from '../lib/palette';
 import { Avatar } from './Avatar';
 
@@ -14,7 +14,7 @@ export function ChildPicker({ value, onChange, multiple = false }: Props) {
   if (kids.length === 0) {
     return (
       <p class="muted small">
-        No kids yet. <a href="#/kids/new">Add a kid</a> first.
+        No {L.value.many} yet. <a href="#/kids/new">Add a {L.value.one}</a> first.
       </p>
     );
   }

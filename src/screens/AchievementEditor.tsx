@@ -4,7 +4,7 @@ import { ChildPicker } from '../components/ChildPicker';
 import { TagInput } from '../components/TagInput';
 import { MarkdownEditor } from '../components/MarkdownEditor';
 import { ConfirmDialog } from '../components/Dialog';
-import { achievements, addAchievement, childById, removeAchievement, toast, updateAchievement } from '../store';
+import { L, achievements, addAchievement, childById, removeAchievement, toast, updateAchievement } from '../store';
 import { back, navigate, useRoute } from '../router';
 import { isValidIsoDate, todayIso } from '../lib/dates';
 import { recordsHref } from '../lib/filters';
@@ -52,7 +52,7 @@ export function AchievementEditorScreen({ achievementId }: Props) {
   function validate(): boolean {
     const e: typeof errors = {};
     if (!title.trim()) e.title = 'Give this achievement a title.';
-    if (childIds.length === 0) e.child = isEdit ? 'Choose a kid.' : 'Choose at least one kid.';
+    if (childIds.length === 0) e.child = isEdit ? `Choose a ${L.value.one}.` : `Choose at least one ${L.value.one}.`;
     if (!isValidIsoDate(date)) e.date = 'Enter a valid date.';
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -75,7 +75,7 @@ export function AchievementEditorScreen({ achievementId }: Props) {
         toast('Achievement saved');
         navigate(`/records/${created[0].id}`, { replace: true });
       } else {
-        toast(`Saved for ${created.length} kids`);
+        toast(`Saved for ${L.value.count(created.length)}`);
         navigate(recordsHref({ childIds, range: 'custom', from: date, to: date }).slice(1), { replace: true });
       }
     } finally {
@@ -115,7 +115,7 @@ export function AchievementEditorScreen({ achievementId }: Props) {
         }}
       >
         <div class="field">
-          <span class="field__label">{isEdit ? 'Kid' : 'Kids'}</span>
+          <span class="field__label">{isEdit ? L.value.One : L.value.Many}</span>
           <ChildPicker value={childIds} onChange={setChildIds} multiple={!isEdit} />
           {!isEdit && childIds.length > 1 && <p class="muted small">A separate record is saved for each kid.</p>}
           {errors.child && <div class="field__error">{errors.child}</div>}

@@ -9,7 +9,7 @@ import { Dialog } from '../components/Dialog';
 import { EmptyState } from '../components/EmptyState';
 import { TagChip } from '../components/TagChip';
 import { IconCheck, IconX } from '../components/Icons';
-import { achievements, childById, childName, children, settings, sortedChildren, tags } from '../store';
+import { L, achievements, childById, childName, children, settings, sortedChildren, tags } from '../store';
 import { navigate, useRoute } from '../router';
 import { computeStats, monthRange } from '../lib/stats';
 import { formatDate, monthLabel, rangeFor, type RangePreset } from '../lib/dates';
@@ -64,7 +64,7 @@ export function StatsScreen() {
                 <span
                   class="chip__x"
                   role="button"
-                  aria-label="Show all kids"
+                  aria-label={`Show all ${L.value.many}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     setQuery({ child: null });
@@ -74,7 +74,7 @@ export function StatsScreen() {
                 </span>
               </>
             ) : (
-              'All kids'
+              `All ${L.value.many}`
             )}
           </button>
         }
@@ -106,7 +106,7 @@ export function StatsScreen() {
               {child ? (
                 <MetricCard value={stats.streak} label={stats.streak === 1 ? 'Month streak' : 'Month streak'} />
               ) : (
-                <MetricCard value={stats.averagePerKid} label="Average per kid" />
+                <MetricCard value={stats.averagePerKid} label={`Average per ${L.value.one}`} />
               )}
               <MetricCard value={stats.tagsUsed} label="Tags used" />
               <MetricCard
@@ -153,7 +153,7 @@ export function StatsScreen() {
 
             {!child && (
               <section class="stack">
-                <h2 class="section-title">By kid</h2>
+                <h2 class="section-title">By {L.value.one}</h2>
                 <HBarList
                   items={stats.perKid.map((k) => ({
                     key: k.child.id,
@@ -214,7 +214,7 @@ export function StatsScreen() {
         )}
       </div>
 
-      <Dialog open={pickerOpen} onClose={() => setPickerOpen(false)} variant="sheet" label="Choose kid">
+      <Dialog open={pickerOpen} onClose={() => setPickerOpen(false)} variant="sheet" label={`Choose ${L.value.one}`}>
         <h2>Show stats for</h2>
         <div class="list">
           <button
@@ -225,7 +225,7 @@ export function StatsScreen() {
               setPickerOpen(false);
             }}
           >
-            <span class="grow">All kids</span>
+            <span class="grow">All {L.value.many}</span>
             {!child && <IconCheck />}
           </button>
           {sortedChildren.value.map((k) => (

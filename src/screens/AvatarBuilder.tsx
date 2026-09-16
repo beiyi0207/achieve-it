@@ -3,7 +3,7 @@ import { Header } from '../components/Header';
 import { Avatar } from '../components/Avatar';
 import { SegmentedControl } from '../components/SegmentedControl';
 import { IconShuffle, IconUndo } from '../components/Icons';
-import { childById, toast, updateChild } from '../store';
+import { L, childById, toast, updateChild } from '../store';
 import { navigate } from '../router';
 import { getStyle, NONE, renderAvatarSvg, shuffleConfig, SLOT_ORDER, STYLES, switchStyle, type Slot, type SlotDef } from '../lib/avatar';
 import { AVATAR_BACKGROUNDS, cssHex } from '../lib/palette';
@@ -22,7 +22,7 @@ export function AvatarBuilderScreen({ childId }: Props) {
       <>
         <Header variant="centered" title="Avatar" left={<a class="text-btn" href="#/kids">Back</a>} />
         <div class="container">
-          <p class="muted">This kid no longer exists.</p>
+          <p class="muted">This {L.value.one} no longer exists.</p>
         </div>
       </>
     );

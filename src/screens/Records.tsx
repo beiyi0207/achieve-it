@@ -6,7 +6,7 @@ import { SegmentedControl } from '../components/SegmentedControl';
 import { EmptyState } from '../components/EmptyState';
 import { Dialog } from '../components/Dialog';
 import { IconCheck, IconChevron, IconFilter, IconSearch, IconSort, IconX } from '../components/Icons';
-import { achievements, childById, childName, settings, sortedChildren, sortedTags, tagById } from '../store';
+import { L, achievements, childById, childName, settings, sortedChildren, sortedTags, tagById } from '../store';
 import { navigate, useRoute } from '../router';
 import { filterAchievements, groupAchievements, queryFromView, sortAchievements, viewFromQuery, type RecordFilter, type RecordView } from '../lib/filters';
 import { formatDate, type RangePreset } from '../lib/dates';
@@ -29,8 +29,8 @@ export function RecordsScreen() {
   const [filterOpen, setFilterOpen] = useState(false);
 
   const ctx = useMemo(
-    () => ({ children: childById.value, tags: tagById.value, terms: s.termDates }),
-    [childById.value, tagById.value, s.termDates],
+    () => ({ children: childById.value, tags: tagById.value, terms: s.termDates, unknownChildLabel: `Unknown ${L.value.one}` }),
+    [childById.value, tagById.value, s.termDates, L.value],
   );
 
   const all = achievements.value;
@@ -48,7 +48,7 @@ export function RecordsScreen() {
   const activeChips: { key: string; label: string; onClear: () => void }[] = [
     ...f.childIds.map((id) => ({
       key: `c-${id}`,
-      label: childById.value.get(id)?.firstName ?? 'Unknown kid',
+      label: childById.value.get(id)?.firstName ?? `Unknown ${L.value.one}`,
       onClear: () => setFilter({ childIds: f.childIds.filter((x) => x !== id) }),
     })),
     ...f.tagIds.map((id) => ({
@@ -120,7 +120,7 @@ export function RecordsScreen() {
           onChange={(g) => update({ ...view, groupBy: g })}
           options={[
             { value: 'date', label: 'Date' },
-            { value: 'child', label: 'Child' },
+            { value: 'child', label: L.value.One },
             { value: 'tag', label: 'Tag' },
             { value: 'none', label: 'None' },
           ]}
@@ -180,7 +180,7 @@ export function RecordsScreen() {
           {(
             [
               ['date', 'Date'],
-              ['child', 'Child'],
+              ['child', L.value.One],
               ['tag', 'Tag'],
             ] as [SortKey, string][]
           ).map(([k, label]) => (
@@ -205,7 +205,7 @@ export function RecordsScreen() {
       </Dialog>
 
       <Dialog open={filterOpen} onClose={() => setFilterOpen(false)} variant="sheet" label="Filter records">
-        <h2>Kids</h2>
+        <h2>{L.value.Many}</h2>
         <div class="chip-row">
           {sortedChildren.value.map((k) => {
             const on = f.childIds.includes(k.id);
@@ -222,7 +222,7 @@ export function RecordsScreen() {
               </button>
             );
           })}
-          {sortedChildren.value.length === 0 && <span class="muted small">No kids yet.</span>}
+          {sortedChildren.value.length === 0 && <span class="muted small">No {L.value.many} yet.</span>}
         </div>
 
         <h2>Tags</h2>

@@ -1,4 +1,5 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
+import { normaliseLabels } from './lib/labels';
 import { DEFAULT_SETTINGS, type Achievement, type Child, type DataSnapshot, type Settings, type Tag } from './types';
 
 /**
@@ -151,6 +152,7 @@ export function normaliseSettings(input: Partial<Settings> | undefined | null): 
   delete s.key;
   if (!s.defaultRecordView || !s.defaultRecordView.sort) s.defaultRecordView = { ...DEFAULT_SETTINGS.defaultRecordView };
   if (!Array.isArray(s.termDates)) s.termDates = [];
+  s.labels = normaliseLabels(s.labels);
   if (typeof s.backupReminderDays !== 'number' || s.backupReminderDays < 1) s.backupReminderDays = DEFAULT_SETTINGS.backupReminderDays;
   return s;
 }

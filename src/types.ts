@@ -54,6 +54,8 @@ export type Settings = {
   backupReminderDays: number;
   lastExportAt?: string;
   termDates?: TermDate[];
+  /** What to call the people being tracked. */
+  labels?: { singular: string; plural: string };
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -63,6 +65,7 @@ export const DEFAULT_SETTINGS: Settings = {
   appearance: 'system',
   backupReminderDays: 14,
   termDates: [],
+  labels: { singular: 'kid', plural: 'kids' },
 };
 
 /** Shape of a full JSON backup. */

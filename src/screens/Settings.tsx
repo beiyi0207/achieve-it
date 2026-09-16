@@ -1,12 +1,13 @@
-import { useRef, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { Header } from '../components/Header';
 import { ConfirmDialog, Dialog } from '../components/Dialog';
 import { SegmentedControl } from '../components/SegmentedControl';
 import { IconChevron } from '../components/Icons';
-import { achievements, children, eraseAllData, replaceAllData, settings, snapshot, tags, toast, updateSettings } from '../store';
+import { L, achievements, children, eraseAllData, replaceAllData, settings, snapshot, tags, toast, updateSettings } from '../store';
 import { daysSince } from '../lib/dates';
 import { mergeSnapshots, parseBackup, readFileText } from '../lib/import';
 import { installAvailable, installed, isIosSafari, promptInstall } from '../lib/install';
+import { LABEL_MAX, LABEL_PRESETS, normaliseLabels } from '../lib/labels';
 import { ExportSheet } from './ExportSheet';
 import type { Appearance, DataSnapshot, GroupBy, SortDirection, SortKey } from '../types';
 
@@ -21,6 +22,21 @@ export function SettingsScreen() {
   const [eraseText, setEraseText] = useState('');
   const [iosHintOpen, setIosHintOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Label inputs are edited locally and saved on blur/Enter so we do not write to the database per keystroke.
+  const savedLabels = normaliseLabels(s.labels);
+  const [labelDraft, setLabelDraft] = useState(savedLabels);
+  useEffect(() => setLabelDraft(savedLabels), [savedLabels.singular, savedLabels.plural]);
+  const labelPreview = normaliseLabels(labelDraft);
+
+  async function commitLabels(next = labelDraft) {
+    const clean = normaliseLabels(next);
+    setLabelDraft(clean);
+    if (clean.singular !== savedLabels.singular || clean.plural !== savedLabels.plural) {
+      await updateSettings({ labels: clean });
+      toast('Labels updated');
+    }
+  }
 
   const days = s.lastExportAt ? daysSince(s.lastExportAt) : null;
   const needsBackup = (recordCount > 0 || kidCount > 0) && (days === null || days >= s.backupReminderDays);
@@ -114,6 +130,55 @@ export function SettingsScreen() {
           </a>
         </div>
 
+        <h2 class="section-title">Labels</h2>
+        <div class="list">
+          <div class="list-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
+            <div>
+              <div class="list-row__title">What do you call them?</div>
+              <div class="list-row__sub">Used everywhere in the app, for example “Your {labelPreview.plural.toLowerCase()}” and “Add {labelPreview.singular.toLowerCase()}”.</div>
+            </div>
+            <div class="chip-row">
+              {LABEL_PRESETS.map((p) => {
+                const on = p.singular === savedLabels.singular.toLowerCase() && p.plural === savedLabels.plural.toLowerCase();
+                return (
+                  <button key={p.plural} type="button" class={`chip ${on ? 'chip--active' : ''}`} aria-pressed={on} onClick={() => commitLabels(p)}>
+                    {p.plural.charAt(0).toUpperCase() + p.plural.slice(1)}
+                  </button>
+                );
+              })}
+            </div>
+            <div class="row">
+              <label class="field grow">
+                <span class="field__label">One</span>
+                <input
+                  class="input"
+                  value={labelDraft.singular}
+                  maxLength={LABEL_MAX}
+                  placeholder="kid"
+                  autocomplete="off"
+                  onInput={(e) => setLabelDraft({ ...labelDraft, singular: (e.target as HTMLInputElement).value })}
+                  onBlur={() => commitLabels()}
+                  onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+                />
+              </label>
+              <label class="field grow">
+                <span class="field__label">Several</span>
+                <input
+                  class="input"
+                  value={labelDraft.plural}
+                  maxLength={LABEL_MAX}
+                  placeholder="kids"
+                  autocomplete="off"
+                  onInput={(e) => setLabelDraft({ ...labelDraft, plural: (e.target as HTMLInputElement).value })}
+                  onBlur={() => commitLabels()}
+                  onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+                />
+              </label>
+            </div>
+            <div class="list-row__sub">Up to {LABEL_MAX} characters each, so labels keep fitting on small screens.</div>
+          </div>
+        </div>
+
         <h2 class="section-title">App</h2>
         <div class="list">
           {showInstall && (
@@ -158,7 +223,7 @@ export function SettingsScreen() {
                   onChange={(e) => updateSettings({ defaultRecordView: { ...s.defaultRecordView, sort: (e.target as HTMLSelectElement).value as SortKey } })}
                 >
                   <option value="date">Date</option>
-                  <option value="child">Child</option>
+                  <option value="child">{L.value.One}</option>
                   <option value="tag">Tag</option>
                 </select>
               </label>
@@ -180,7 +245,7 @@ export function SettingsScreen() {
               <span class="field__label">Group by</span>
               <select class="select" value={s.groupBy} onChange={(e) => updateSettings({ groupBy: (e.target as HTMLSelectElement).value as GroupBy })}>
                 <option value="date">Date</option>
-                <option value="child">Child</option>
+                <option value="child">{L.value.One}</option>
                 <option value="tag">Tag</option>
                 <option value="none">None</option>
               </select>
@@ -226,14 +291,14 @@ export function SettingsScreen() {
               <div class="list-row__title" style={{ color: 'var(--danger)' }}>
                 Erase all data
               </div>
-              <div class="list-row__sub">Deletes every kid, record, tag and setting from this browser.</div>
+              <div class="list-row__sub">Deletes every {L.value.one}, record, tag and setting from this browser.</div>
             </div>
             <IconChevron class="chevron" />
           </button>
         </div>
 
         <p class="muted small" style={{ textAlign: 'center' }}>
-          Version {__APP_VERSION__} · {kidCount} {kidCount === 1 ? 'kid' : 'kids'} · {recordCount} {recordCount === 1 ? 'record' : 'records'}
+          Version {__APP_VERSION__} · {L.value.count(kidCount)} · {recordCount} {recordCount === 1 ? 'record' : 'records'}
         </p>
       </div>
 
@@ -246,7 +311,7 @@ export function SettingsScreen() {
         message={
           pendingImport && (
             <>
-              The file contains {pendingImport.children.length} {pendingImport.children.length === 1 ? 'kid' : 'kids'}, {pendingImport.achievements.length}{' '}
+              The file contains {L.value.count(pendingImport.children.length)}, {pendingImport.achievements.length}{' '}
               {pendingImport.achievements.length === 1 ? 'record' : 'records'} and {pendingImport.tags.length} {pendingImport.tags.length === 1 ? 'tag' : 'tags'}.
               <br />
               <br />
@@ -293,7 +358,7 @@ export function SettingsScreen() {
       <Dialog open={eraseOpen} onClose={() => setEraseOpen(false)} label="Erase all data">
         <h2>Erase all data?</h2>
         <p class="muted small">
-          This deletes {kidCount} {kidCount === 1 ? 'kid' : 'kids'} and {recordCount} {recordCount === 1 ? 'record' : 'records'} from this browser. It cannot be undone.
+          This deletes {L.value.count(kidCount)} and {recordCount} {recordCount === 1 ? 'record' : 'records'} from this browser. It cannot be undone.
           Export a backup first if you might want them back.
         </p>
         <div class="field">

@@ -3,7 +3,7 @@ import { Dialog } from '../components/Dialog';
 import { SegmentedControl } from '../components/SegmentedControl';
 import { Avatar } from '../components/Avatar';
 import { IconDownload, IconShare } from '../components/Icons';
-import { settings, snapshot, sortedChildren, toast, updateSettings } from '../store';
+import { L, settings, snapshot, sortedChildren, toast, updateSettings } from '../store';
 import { buildBackup, buildCsv, canShareFiles, DEFAULT_EXPORT, downloadFile, exportFilename, shareFile, type ExportOptions } from '../lib/export';
 import type { RangePreset } from '../lib/dates';
 
@@ -72,14 +72,14 @@ export function ExportSheet({ open, onClose }: Props) {
       />
       <p class="muted small">
         {o.format === 'json'
-          ? 'Everything, including kids, tags and settings. Use this to restore or move to another device.'
+          ? `Everything, including ${L.value.many}, tags and settings. Use this to restore or move to another device.`
           : 'Records only, one row per achievement. Good for spreadsheets; cannot be imported back.'}
       </p>
 
-      <h3>Kids</h3>
+      <h3>{L.value.Many}</h3>
       <div class="chip-row">
         <button type="button" class={`chip ${o.childIds.length === 0 ? 'chip--active' : ''}`} aria-pressed={o.childIds.length === 0} onClick={() => patch({ childIds: [] })}>
-          All kids
+          All {L.value.many}
         </button>
         {kids.map((k) => {
           const on = o.childIds.includes(k.id);
@@ -135,7 +135,7 @@ export function ExportSheet({ open, onClose }: Props) {
 
       <p class="muted small">
         {preview.count} {preview.count === 1 ? 'record' : 'records'}
-        {o.format === 'json' && preview.kids !== undefined && <> · {preview.kids} {preview.kids === 1 ? 'kid' : 'kids'}</>}
+        {o.format === 'json' && preview.kids !== undefined && <> · {L.value.count(preview.kids)}</>}
       </p>
 
       <div class="row">

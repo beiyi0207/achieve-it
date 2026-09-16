@@ -3,7 +3,7 @@ import { Header } from '../components/Header';
 import { Avatar } from '../components/Avatar';
 import { TagChip } from '../components/TagChip';
 import { IconBack, IconCopy, IconEdit } from '../components/Icons';
-import { achievements, childById, childName, tagById } from '../store';
+import { L, achievements, childById, childName, tagById } from '../store';
 import { back } from '../router';
 import { formatDate, formatDateTime } from '../lib/dates';
 import { renderMarkdown } from '../lib/markdown';
@@ -75,7 +75,7 @@ export function RecordDetailScreen({ achievementId }: Props) {
         )}
         {html ? <div class="markdown card" dangerouslySetInnerHTML={{ __html: html }} /> : <p class="muted">No description.</p>}
         <a class="btn" href={`#/new?from=${a.id}`}>
-          <IconCopy size={18} /> Duplicate for another kid or day
+          <IconCopy size={18} /> Duplicate for another {L.value.one} or day
         </a>
         <p class="muted small">
           Added {formatDateTime(a.createdAt)}

@@ -6,7 +6,7 @@ import { EmptyState } from '../components/EmptyState';
 import { ConfirmDialog } from '../components/Dialog';
 import { SwipeRow } from '../components/SwipeRow';
 import { IconAddPerson, IconChevron, IconSearch, IconX } from '../components/Icons';
-import { achievements, childName, removeChild, settings, sortedChildren, toast } from '../store';
+import { L, achievements, childName, removeChild, settings, sortedChildren, toast } from '../store';
 import { monthKey, todayIso } from '../lib/dates';
 import type { Child } from '../types';
 
@@ -40,13 +40,13 @@ export function KidsScreen() {
   return (
     <>
       <Header
-        title="Your kids"
+        title={`Your ${L.value.many}`}
         right={
           <>
             <button
               type="button"
               class="icon-btn"
-              aria-label={searchOpen ? 'Close search' : 'Search kids'}
+              aria-label={searchOpen ? 'Close search' : `Search ${L.value.many}`}
               aria-pressed={searchOpen}
               onClick={() => {
                 setSearchOpen((v) => !v);
@@ -55,7 +55,7 @@ export function KidsScreen() {
             >
               {searchOpen ? <IconX size={22} /> : <IconSearch />}
             </button>
-            <a class="icon-btn" href="#/kids/new" aria-label="Add kid">
+            <a class="icon-btn" href="#/kids/new" aria-label={`Add ${L.value.one}`}>
               <IconAddPerson />
             </a>
           </>
@@ -76,17 +76,17 @@ export function KidsScreen() {
         )}
 
         <div class="metric-grid">
-          <MetricCard value={kids.length} label={kids.length === 1 ? 'Kid' : 'Kids'} />
+          <MetricCard value={kids.length} label={kids.length === 1 ? L.value.One : L.value.Many} />
           <MetricCard value={thisMonth} label="Achievements this month" href="#/records?range=month" />
         </div>
 
         {kids.length === 0 ? (
           <EmptyState
-            title="No kids yet"
-            message="Add the first child to start recording their achievements."
+            title={`No ${L.value.many} yet`}
+            message={`Add the first ${L.value.one} to start recording their achievements.`}
             action={
               <a class="btn btn--primary" href="#/kids/new" style={{ width: 'auto' }}>
-                Add a kid
+                Add a {L.value.one}
               </a>
             }
           />
@@ -111,7 +111,7 @@ export function KidsScreen() {
             ))}
           </div>
         )}
-        {kids.length > 0 && <p class="muted small" style={{ textAlign: 'center' }}>Swipe left on a kid to delete.</p>}
+        {kids.length > 0 && <p class="muted small" style={{ textAlign: 'center' }}>Swipe left on a {L.value.one} to delete.</p>}
       </div>
 
       <ConfirmDialog
@@ -127,28 +127,28 @@ export function KidsScreen() {
           pendingCount > 0
             ? [
                 {
-                  label: 'Delete kid and records',
+                  label: `Delete ${L.value.one} and records`,
                   kind: 'danger',
                   onClick: async () => {
                     await removeChild(pending!.id, 'delete');
-                    toast('Kid and records deleted');
+                    toast(`${L.value.One} and records deleted`);
                   },
                 },
                 {
-                  label: 'Delete kid, keep records',
+                  label: `Delete ${L.value.one}, keep records`,
                   onClick: async () => {
                     await removeChild(pending!.id, 'keep');
-                    toast('Kid deleted. Records kept.');
+                    toast(`${L.value.One} deleted. Records kept.`);
                   },
                 },
               ]
             : [
                 {
-                  label: 'Delete kid',
+                  label: `Delete ${L.value.one}`,
                   kind: 'danger',
                   onClick: async () => {
                     await removeChild(pending!.id, 'delete');
-                    toast('Kid deleted');
+                    toast(`${L.value.One} deleted`);
                   },
                 },
               ]

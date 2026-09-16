@@ -3,7 +3,7 @@ import { Header } from '../components/Header';
 import { Avatar } from '../components/Avatar';
 import { TagChip } from '../components/TagChip';
 import { IconBack, IconEdit, IconPlus } from '../components/Icons';
-import { achievements, childById, childName, settings, tagById } from '../store';
+import { L, achievements, childById, childName, settings, tagById } from '../store';
 import { back } from '../router';
 import { formatDate, monthKey, monthLabel } from '../lib/dates';
 import { cssHex, tagHex } from '../lib/palette';
@@ -48,7 +48,7 @@ export function ChildProfileScreen({ childId }: Props) {
       <>
         <Header
           variant="centered"
-          title="Kid"
+          title={L.value.One}
           left={
             <a class="icon-btn" href="#/kids" aria-label="Back">
               <IconBack />
@@ -56,7 +56,7 @@ export function ChildProfileScreen({ childId }: Props) {
           }
         />
         <div class="container">
-          <p class="muted">This kid no longer exists.</p>
+          <p class="muted">This {L.value.one} no longer exists.</p>
         </div>
       </>
     );
