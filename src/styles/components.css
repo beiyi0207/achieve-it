@@ -883,3 +883,66 @@ dialog::backdrop {
     0 0 0 3px var(--surface),
     0 0 0 6px var(--ring, var(--accent));
 }
+
+/* ---------- Grouped records ---------- */
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.group + .group {
+  margin-top: 8px;
+}
+
+.group__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--group) 16%, var(--surface));
+  color: var(--text);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.group__head a {
+  color: inherit;
+}
+
+.group__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--group);
+  flex: 0 0 auto;
+}
+
+.group__count {
+  margin-left: auto;
+  font-weight: 600;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.record-row {
+  min-height: 60px;
+}
+
+.record-row__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.icon-btn--active {
+  background: var(--accent-soft);
+}
+
+.list-row.list-row--button {
+  cursor: pointer;
+}
