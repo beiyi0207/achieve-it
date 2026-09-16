@@ -444,14 +444,12 @@ button.chip {
   display: block;
   width: 100%;
   min-width: 0;
-  height: 48px;
+  height: 48px !important;
   min-height: 48px;
-  padding: 0;
-  line-height: 1;
-  text-align: left;
-  background-color: var(--surface);
-  color: var(--text);
-  font: inherit;
+  padding: 0 14px !important;
+  line-height: 1 !important;
+  background-color: var(--surface) !important;
+  color: var(--text) !important;
   box-sizing: border-box;
 }
 
