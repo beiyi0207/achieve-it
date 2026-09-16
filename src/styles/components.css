@@ -1058,3 +1058,167 @@ dialog::backdrop {
     0 0 0 4px var(--accent),
     inset 0 0 0 1px rgba(0, 0, 0, 0.12);
 }
+
+/* ---------- Charts ---------- */
+.barchart {
+  width: 100%;
+}
+
+.barchart--scroll {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.barchart--scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.barchart__inner {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 160px;
+}
+
+.bar {
+  flex: 1 1 0;
+  min-width: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  height: 100%;
+  color: var(--text-2);
+  border-radius: var(--radius-sm);
+}
+
+.bar:active {
+  background: var(--surface-2);
+}
+
+.bar__value {
+  font-size: 12px;
+  font-weight: 600;
+  min-height: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.bar__track {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  background: var(--surface-2);
+  border-radius: 6px 6px 3px 3px;
+  overflow: hidden;
+}
+
+.bar__fill {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  min-height: 0;
+  transition: height 0.2s;
+}
+
+.bar__label {
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+}
+
+.bar__label small {
+  font-size: 9px;
+  color: var(--text-3);
+}
+
+.hbars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  color: var(--text);
+}
+
+.hbar:active {
+  background: var(--surface-2);
+}
+
+.hbar__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hbar__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.hbar__count {
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.hbar__track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.hbar__fill {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.2s;
+}
+
+.growth {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-3);
+  min-width: 32px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.growth--up {
+  color: var(--success);
+}
+
+.growth--down {
+  color: var(--danger);
+}
+
+.nudge {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--warn-soft);
+  border: 1px solid color-mix(in srgb, var(--warn) 40%, transparent);
+}
+
+.nudge h3 {
+  color: var(--warn);
+}
