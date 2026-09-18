@@ -3,7 +3,7 @@ import { Header } from '../components/Header';
 import { Avatar } from '../components/Avatar';
 import { TagChip } from '../components/TagChip';
 import { IconBack, IconEdit, IconPlus } from '../components/Icons';
-import { L, achievements, childById, childName, settings, tagById } from '../store';
+import { L, achievements, childById, childName, tagById } from '../store';
 import { back } from '../router';
 import { formatDate, monthKey, monthLabel } from '../lib/dates';
 import { cssHex, tagHex } from '../lib/palette';
@@ -16,7 +16,6 @@ export function ChildProfileScreen({ childId }: Props) {
   const child = childById.value.get(childId);
   const all = achievements.value;
   const tags = tagById.value;
-  const showAges = settings.value.showAges;
 
   const mine = useMemo(
     () => all.filter((a) => a.childId === childId).sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.createdAt.localeCompare(a.createdAt))),
@@ -85,7 +84,6 @@ export function ChildProfileScreen({ childId }: Props) {
           <Avatar config={child.avatar} firstName={child.firstName} lastName={child.lastName} size={112} />
           <h2>{childName(child)}</h2>
           <p class="muted">
-            {showAges && <>Age {child.age} · </>}
             {mine.length} {mine.length === 1 ? 'achievement' : 'achievements'}
           </p>
         </div>

@@ -6,7 +6,6 @@ const kid = (id: string, first: string, bg = 'ffd166'): Child => ({
   id,
   firstName: first,
   lastName: 'X',
-  age: 7,
   avatar: { style: 'lorelei', skin: '', hair: '', hairColor: '', eyes: '', mouth: '', extras: 'none', background: bg },
   createdAt: '2026-01-01T00:00:00.000Z',
 });

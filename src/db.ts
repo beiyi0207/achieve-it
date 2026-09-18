@@ -181,8 +181,9 @@ export class IndexedDbStore implements DataStore {
 
 /** Fill in any missing settings keys (forward-compatible with older backups). */
 export function normaliseSettings(input: Partial<Settings> | undefined | null): Settings {
-  const s = { ...DEFAULT_SETTINGS, ...(input ?? {}) } as Settings & { key?: string };
+  const s = { ...DEFAULT_SETTINGS, ...(input ?? {}) } as Settings & { key?: string; showAges?: boolean };
   delete s.key;
+  delete s.showAges; // removed in v2 of the data format; ignore it from older stores and backups
   if (!s.defaultRecordView || !s.defaultRecordView.sort) s.defaultRecordView = { ...DEFAULT_SETTINGS.defaultRecordView };
   if (!Array.isArray(s.termDates)) s.termDates = [];
   s.labels = normaliseLabels(s.labels);

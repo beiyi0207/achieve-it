@@ -261,19 +261,6 @@ export function SettingsScreen() {
               </select>
             </label>
           </div>
-          <div class="list-row">
-            <div class="grow">
-              <div class="list-row__title">Show ages on cards</div>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              class="toggle"
-              aria-checked={s.showAges}
-              aria-label="Show ages on cards"
-              onClick={() => updateSettings({ showAges: !s.showAges })}
-            />
-          </div>
           <a class="list-row" href="#/settings/terms">
             <div class="grow">
               <div class="list-row__title">Term dates</div>

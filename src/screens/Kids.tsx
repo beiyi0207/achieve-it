@@ -6,14 +6,13 @@ import { EmptyState } from '../components/EmptyState';
 import { ConfirmDialog } from '../components/Dialog';
 import { SwipeRow } from '../components/SwipeRow';
 import { IconAddPerson, IconChevron, IconSearch, IconX } from '../components/Icons';
-import { L, achievements, childName, removeChild, settings, sortedChildren, toast } from '../store';
+import { L, achievements, childName, removeChild, sortedChildren, toast } from '../store';
 import { monthKey, todayIso } from '../lib/dates';
 import type { Child } from '../types';
 
 export function KidsScreen() {
   const kids = sortedChildren.value;
   const all = achievements.value;
-  const showAges = settings.value.showAges;
   const [searchOpen, setSearchOpen] = useState(false);
   const [q, setQ] = useState('');
   const [pending, setPending] = useState<Child | null>(null);
@@ -101,7 +100,6 @@ export function KidsScreen() {
                   <div class="grow">
                     <div class="list-row__title truncate">{childName(k)}</div>
                     <div class="list-row__sub">
-                      {showAges && <>Age {k.age} · </>}
                       {countByChild.get(k.id) ?? 0} {countByChild.get(k.id) === 1 ? 'achievement' : 'achievements'}
                     </div>
                   </div>

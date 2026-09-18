@@ -7,7 +7,6 @@ const kid = (id: string, first: string): Child => ({
   id,
   firstName: first,
   lastName: 'Lee',
-  age: 8,
   avatar: { style: 'lorelei', skin: 'f8d9c6', hair: 'variant01', hairColor: '0e0e0e', eyes: 'variant01', mouth: 'happy01', extras: 'none', background: 'ffd166' },
   createdAt: '2026-01-01T00:00:00.000Z',
 });
@@ -53,7 +52,7 @@ const snap: DataSnapshot = {
   ],
   tags,
   templates: [tpl('tp1', 'Reading log')],
-  settings: { ...DEFAULT_SETTINGS, showAges: false },
+  settings: { ...DEFAULT_SETTINGS, backupReminderDays: 30 },
 };
 
 describe('buildBackup', () => {
@@ -65,7 +64,7 @@ describe('buildBackup', () => {
     expect(b.tags).toHaveLength(2);
     expect(b.templates).toHaveLength(1);
     expect(b.version).toBe(2);
-    expect(b.settings?.showAges).toBe(false);
+    expect(b.settings?.backupReminderDays).toBe(30);
   });
 
   it('filters by kid and range, and only keeps referenced tags', () => {
@@ -86,7 +85,7 @@ describe('buildCsv', () => {
   it('escapes quotes, commas and newlines', () => {
     const csv = buildCsv(snap, { ...DEFAULT_EXPORT, format: 'csv' });
     const lines = csv.split('\r\n');
-    expect(lines[0]).toBe('date,child_first_name,child_last_name,child_age,title,tags,description,record_id,child_id,template');
+    expect(lines[0]).toBe('date,child_first_name,child_last_name,title,tags,description,record_id,child_id,template');
     expect(lines[1]).toContain('"Title, with ""quotes"" 1"');
     expect(lines[1]).toContain('"line one\nline two"');
     expect(lines[1]).toContain('Reading');
@@ -116,7 +115,7 @@ describe('parseBackup', () => {
     expect(p.data.achievements).toHaveLength(3);
     expect(p.data.templates).toHaveLength(1);
     expect(p.data.achievements[0]).toMatchObject({ templateId: 'tp1', templateVersion: 1, batchId: 'batch-1' });
-    expect(p.data.settings.showAges).toBe(false);
+    expect(p.data.settings.backupReminderDays).toBe(30);
   });
 
   it('accepts version 1 backups without templates and rejects newer ones', () => {
@@ -152,7 +151,7 @@ describe('parseBackup', () => {
     expect(parseBackup('[]').ok).toBe(false);
   });
 
-  it('regenerates missing avatars and drops unknown tag ids', () => {
+  it('regenerates missing avatars, ignores legacy age and drops unknown tag ids', () => {
     const text = JSON.stringify({
       app: 'achieve-it',
       version: 1,
@@ -164,7 +163,7 @@ describe('parseBackup', () => {
     expect(p.ok).toBe(true);
     if (!p.ok) return;
     expect(p.data.children[0].avatar.style).toBe('lorelei');
-    expect(p.data.children[0].age).toBe(5);
+    expect('age' in p.data.children[0]).toBe(false);
     expect(p.data.achievements[0].tags).toEqual([]);
   });
 });
@@ -183,7 +182,7 @@ describe('mergeSnapshots', () => {
         { id: 't-other', name: 'sport', color: 'red' }, // same name as t2, different id
       ],
       templates: [],
-      settings: { ...DEFAULT_SETTINGS, showAges: true },
+      settings: { ...DEFAULT_SETTINGS, backupReminderDays: 7 },
     };
     const m = mergeSnapshots(snap, incoming);
     expect(m.children.map((c) => c.id).sort()).toEqual(['a', 'b', 'c']);
@@ -192,7 +191,7 @@ describe('mergeSnapshots', () => {
     expect(m.achievements.find((a) => a.id === '2')?.date).toBe('2026-03-01');
     expect(m.achievements.find((a) => a.id === '9')?.tags).toEqual(['t2']);
     expect(m.tags).toHaveLength(2);
-    expect(m.settings.showAges).toBe(false);
+    expect(m.settings.backupReminderDays).toBe(30);
   });
 
   it('merges templates by id, renames name clashes and remaps merged tags', () => {

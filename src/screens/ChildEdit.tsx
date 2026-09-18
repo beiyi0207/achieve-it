@@ -16,10 +16,9 @@ export function ChildEditScreen({ childId }: Props) {
 
   const [firstName, setFirstName] = useState(existing?.firstName ?? '');
   const [lastName, setLastName] = useState(existing?.lastName ?? '');
-  const [age, setAge] = useState(existing ? String(existing.age) : '');
   const [avatar, setAvatar] = useState<AvatarConfig | null>(existing?.avatar ?? null);
   const [avatarTouched, setAvatarTouched] = useState(isEdit);
-  const [errors, setErrors] = useState<{ firstName?: string; age?: string }>({});
+  const [errors, setErrors] = useState<{ firstName?: string }>({});
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -42,8 +41,6 @@ export function ChildEditScreen({ childId }: Props) {
   function validate(): boolean {
     const e: typeof errors = {};
     if (!firstName.trim()) e.firstName = 'First name is required.';
-    const n = Number(age);
-    if (age.trim() === '' || !Number.isFinite(n) || !Number.isInteger(n) || n < 0 || n > 150) e.age = 'Enter an age between 0 and 150.';
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -52,7 +49,7 @@ export function ChildEditScreen({ childId }: Props) {
     if (!validate() || saving) return;
     setSaving(true);
     try {
-      const data = { firstName: firstName.trim(), lastName: lastName.trim(), age: Number(age), avatar: previewAvatar };
+      const data = { firstName: firstName.trim(), lastName: lastName.trim(), avatar: previewAvatar };
       if (existing) {
         await updateChild({ ...existing, ...data });
         toast(`${L.value.One} updated`);
@@ -130,21 +127,6 @@ export function ChildEditScreen({ childId }: Props) {
         <div class="field">
           <label for="lastName">Last name</label>
           <input id="lastName" class="input" value={lastName} onInput={(e) => setLastName((e.target as HTMLInputElement).value)} autocomplete="off" />
-        </div>
-
-        <div class="field">
-          <label for="age">Age</label>
-          <input
-            id="age"
-            class="input"
-            type="number"
-            inputMode="numeric"
-            min={0}
-            max={150}
-            value={age}
-            onInput={(e) => setAge((e.target as HTMLInputElement).value)}
-          />
-          {errors.age && <div class="field__error">{errors.age}</div>}
         </div>
 
         <button type="submit" class="btn btn--primary" disabled={saving}>

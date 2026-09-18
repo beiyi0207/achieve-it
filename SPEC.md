@@ -19,7 +19,6 @@ type Child = {
   id: string;            // uuid
   firstName: string;
   lastName: string;
-  age: number;
   avatar: AvatarConfig;
   createdAt: string;     // ISO
 };
@@ -56,7 +55,6 @@ type Tag = {
 type Settings = {
   defaultRecordView: { sort: "date" | "child" | "tag"; direction: "asc" | "desc" };
   groupBy: "date" | "child" | "tag" | "none";
-  showAges: boolean;
   appearance: "system" | "light" | "dark";
   backupReminderDays: number;   // default 14
   lastExportAt?: string;
@@ -73,16 +71,16 @@ Bottom tab bar: **Kids · Records · [+] · Stats · Settings**. The center `+` 
 ### 1. Kids (cohort home)
 - Header: "Your kids", search icon, add-kid icon.
 - Two metric cards: number of kids, achievements this month.
-- List rows: avatar, full name, "Age N · N achievements", chevron.
+- List rows: avatar, full name, "N achievements", chevron.
 - Swipe left on a row to delete. Deleting a child asks what to do with their records (delete or keep as orphaned) — never silently.
 - Empty state invites adding the first kid.
 
 ### 2. Child profile
-- Back and edit icons. Large avatar, name, age, achievement count.
+- Back and edit icons. Large avatar, name, achievement count.
 - Tag chips with per-tag counts for this child.
 - Timeline of this child's achievements grouped by month; each row has a colored left accent bar (tag color), title, date, tag chip.
 - Button: "Add achievement for {name}" — opens the editor with this child preselected.
-- Edit child: first name, last name, age, avatar (opens avatar builder).
+- Edit child: first name, last name, avatar (opens avatar builder).
 
 ### 3. Records (all achievements)
 - Header: "Records", sort icon, filter icon.
@@ -104,7 +102,7 @@ Bottom tab bar: **Kids · Records · [+] · Stats · Settings**. The center `+` 
 - **Backup warning banner** at the top when last export is older than the reminder interval: "Last backup was N days ago. Your data only lives in this browser. Back up now."
 - **Your data:** Export data (opens export sheet), Import backup (JSON only — say so in the UI; confirm before replacing/merging), Backup reminder interval.
 - **Tags:** Manage tags — rename, recolor, delete, and **merge** one tag into another.
-- **App:** Install app (triggers PWA install prompt; hidden if already installed), Appearance (system/light/dark), Default record view, Show ages on cards toggle, Term dates (for teachers; used by the "Term" range in Stats).
+- **App:** Install app (triggers PWA install prompt; hidden if already installed), Appearance (system/light/dark), Default record view, Term dates (for teachers; used by the "Term" range in Stats).
 - **Danger zone:** Erase all data — requires typing "erase" to confirm.
 - Footer: version, kid count, record count.
 

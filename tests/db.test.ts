@@ -8,7 +8,6 @@ const child = (id: string): Child => ({
   id,
   firstName: 'Kid',
   lastName: id,
-  age: 7,
   avatar: { style: 'lorelei', skin: '', hair: '', hairColor: '', eyes: '', mouth: '', extras: 'none', background: 'ffd166' },
   createdAt: '2026-01-01T00:00:00.000Z',
 });
@@ -73,13 +72,13 @@ describe('IndexedDbStore', () => {
     await store.putAchievement(ach('1', 'a'));
     const tag: Tag = { id: 't1', name: 'Reading', color: 'blue' };
     await store.putTag(tag);
-    await store.putSettings({ ...DEFAULT_SETTINGS, showAges: false });
+    await store.putSettings({ ...DEFAULT_SETTINGS, appearance: 'dark' });
 
     const s = await store.loadAll();
     expect(s.children).toHaveLength(1);
     expect(s.achievements[0].title).toBe('Title 1');
     expect(s.tags[0]).toEqual(tag);
-    expect(s.settings.showAges).toBe(false);
+    expect(s.settings.appearance).toBe('dark');
     expect((s.settings as unknown as { key?: string }).key).toBeUndefined();
   });
 
@@ -159,8 +158,9 @@ describe('migration from version 1', () => {
 
 describe('normaliseSettings', () => {
   it('fills defaults and drops the storage key', () => {
-    const s = normaliseSettings({ appearance: 'dark', key: 'settings' } as never);
+    const s = normaliseSettings({ appearance: 'dark', key: 'settings', showAges: true } as never);
     expect(s.appearance).toBe('dark');
+    expect('showAges' in s).toBe(false);
     expect(s.backupReminderDays).toBe(14);
     expect(s.termDates).toEqual([]);
     expect('key' in s).toBe(false);

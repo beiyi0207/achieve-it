@@ -10,9 +10,9 @@ export function buildSeed(now = new Date()): DataSnapshot {
   const created = isoNow();
 
   const kids: Child[] = [
-    { firstName: 'Maya', lastName: 'Okafor', age: 7 },
-    { firstName: 'Leo', lastName: 'Bennett', age: 9 },
-    { firstName: 'Priya', lastName: 'Raman', age: 6 },
+    { firstName: 'Maya', lastName: 'Okafor' },
+    { firstName: 'Leo', lastName: 'Bennett' },
+    { firstName: 'Priya', lastName: 'Raman' },
   ].map((k) => ({ ...k, id: uuid(), createdAt: created, avatar: randomConfig('lorelei', `${k.firstName} ${k.lastName}`) }));
 
   const tagDefs: [string, string][] = [

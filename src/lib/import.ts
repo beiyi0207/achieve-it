@@ -12,7 +12,6 @@ function normChild(raw: unknown): Child | null {
   if (!isObj(raw) || typeof raw.id !== 'string') return null;
   const firstName = str(raw.firstName);
   const lastName = str(raw.lastName);
-  const ageNum = Number(raw.age);
   const avatarRaw = isObj(raw.avatar) ? raw.avatar : null;
   const avatar = avatarRaw && typeof avatarRaw.style === 'string'
     ? {
@@ -31,7 +30,6 @@ function normChild(raw: unknown): Child | null {
     id: raw.id,
     firstName,
     lastName,
-    age: Number.isFinite(ageNum) ? ageNum : 0,
     avatar,
     createdAt: str(raw.createdAt) || new Date().toISOString(),
   };

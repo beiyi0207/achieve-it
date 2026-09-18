@@ -2,7 +2,6 @@ export type Child = {
   id: string;
   firstName: string;
   lastName: string;
-  age: number;
   avatar: AvatarConfig;
   createdAt: string;
 };
@@ -81,7 +80,6 @@ export type TermDate = { name: string; start: string; end: string };
 export type Settings = {
   defaultRecordView: { sort: SortKey; direction: SortDirection };
   groupBy: GroupBy;
-  showAges: boolean;
   appearance: Appearance;
   backupReminderDays: number;
   lastExportAt?: string;
@@ -93,7 +91,6 @@ export type Settings = {
 export const DEFAULT_SETTINGS: Settings = {
   defaultRecordView: { sort: 'date', direction: 'desc' },
   groupBy: 'date',
-  showAges: true,
   appearance: 'system',
   backupReminderDays: 14,
   termDates: [],

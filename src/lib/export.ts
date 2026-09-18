@@ -60,7 +60,7 @@ export function buildCsv(s: DataSnapshot, o: ExportOptions, ctx: Pick<FilterCont
   const childMap = new Map(children.map((c) => [c.id, c]));
   const tagMap = new Map(s.tags.map((t) => [t.id, t]));
   const templateMap = new Map(s.templates.map((t) => [t.id, t]));
-  const header = ['date', 'child_first_name', 'child_last_name', 'child_age', 'title', 'tags', 'description', 'record_id', 'child_id', 'template'];
+  const header = ['date', 'child_first_name', 'child_last_name', 'title', 'tags', 'description', 'record_id', 'child_id', 'template'];
   const rows = [...achievements]
     .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
     .map((a: Achievement) => {
@@ -69,7 +69,6 @@ export function buildCsv(s: DataSnapshot, o: ExportOptions, ctx: Pick<FilterCont
         a.date,
         c?.firstName ?? '',
         c?.lastName ?? '',
-        c?.age ?? '',
         a.title,
         a.tags.map((id) => tagMap.get(id)?.name ?? '').filter(Boolean).join('; '),
         a.description,
