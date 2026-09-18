@@ -13,6 +13,8 @@ import { StatsScreen } from './screens/Stats';
 import { SettingsScreen } from './screens/Settings';
 import { ManageTagsScreen } from './screens/ManageTags';
 import { TermDatesScreen } from './screens/TermDates';
+import { TemplatesListScreen } from './screens/TemplatesList';
+import { TemplateEditorScreen } from './screens/TemplateEditor';
 import { NotFoundScreen } from './screens/NotFound';
 
 function Screen() {
@@ -41,6 +43,11 @@ function Screen() {
     case 'settings':
       if (second === 'tags') return <ManageTagsScreen />;
       if (second === 'terms') return <TermDatesScreen />;
+      if (second === 'templates') {
+        if (!third) return <TemplatesListScreen />;
+        if (third === 'new') return <TemplateEditorScreen key="new" />;
+        return <TemplateEditorScreen key={third} templateId={third} />;
+      }
       return <SettingsScreen />;
     default:
       return <NotFoundScreen />;
@@ -52,6 +59,7 @@ function isFullScreen(segments: string[]): boolean {
   const [root, second, third] = segments;
   if (root === 'new' || root === 'edit') return true;
   if (root === 'kids' && (second === 'new' || third === 'edit' || third === 'avatar')) return true;
+  if (root === 'settings' && second === 'templates' && !!third) return true;
   return false;
 }
 

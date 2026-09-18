@@ -3,7 +3,7 @@ import { Header } from '../components/Header';
 import { ConfirmDialog, Dialog } from '../components/Dialog';
 import { SegmentedControl } from '../components/SegmentedControl';
 import { IconChevron } from '../components/Icons';
-import { L, achievements, children, eraseAllData, replaceAllData, settings, snapshot, tags, toast, updateSettings } from '../store';
+import { L, achievements, children, eraseAllData, replaceAllData, settings, snapshot, tags, templates, toast, updateSettings } from '../store';
 import { daysSince } from '../lib/dates';
 import { mergeSnapshots, parseBackup, readFileText } from '../lib/import';
 import { installAvailable, installed, isIosSafari, promptInstall } from '../lib/install';
@@ -16,6 +16,7 @@ export function SettingsScreen() {
   const kidCount = children.value.length;
   const recordCount = achievements.value.length;
   const tagCount = tags.value.length;
+  const templateCount = templates.value.length;
   const [exportOpen, setExportOpen] = useState(false);
   const [pendingImport, setPendingImport] = useState<DataSnapshot | null>(null);
   const [eraseOpen, setEraseOpen] = useState(false);
@@ -124,6 +125,15 @@ export function SettingsScreen() {
               <div class="list-row__title">Manage tags</div>
               <div class="list-row__sub">
                 {tagCount} {tagCount === 1 ? 'tag' : 'tags'} · rename, recolour, merge or delete
+              </div>
+            </div>
+            <IconChevron class="chevron" />
+          </a>
+          <a class="list-row" href="#/settings/templates">
+            <div class="grow">
+              <div class="list-row__title">Templates</div>
+              <div class="list-row__sub">
+                {templateCount} {templateCount === 1 ? 'template' : 'templates'} · the same shape for every record of a kind
               </div>
             </div>
             <IconChevron class="chevron" />
@@ -291,7 +301,7 @@ export function SettingsScreen() {
               <div class="list-row__title" style={{ color: 'var(--danger)' }}>
                 Erase all data
               </div>
-              <div class="list-row__sub">Deletes every {L.value.one}, record, tag and setting from this browser.</div>
+              <div class="list-row__sub">Deletes every {L.value.one}, record, tag, template and setting from this browser.</div>
             </div>
             <IconChevron class="chevron" />
           </button>
@@ -312,7 +322,8 @@ export function SettingsScreen() {
           pendingImport && (
             <>
               The file contains {L.value.count(pendingImport.children.length)}, {pendingImport.achievements.length}{' '}
-              {pendingImport.achievements.length === 1 ? 'record' : 'records'} and {pendingImport.tags.length} {pendingImport.tags.length === 1 ? 'tag' : 'tags'}.
+              {pendingImport.achievements.length === 1 ? 'record' : 'records'}, {pendingImport.tags.length} {pendingImport.tags.length === 1 ? 'tag' : 'tags'} and{' '}
+              {pendingImport.templates.length} {pendingImport.templates.length === 1 ? 'template' : 'templates'}.
               <br />
               <br />
               <strong>Replace</strong> deletes everything currently in the app first. <strong>Merge</strong> adds what is missing and keeps the newer version of any record

@@ -28,6 +28,12 @@ export type Achievement = {
   /** ISO date, YYYY-MM-DD */
   date: string;
   tags: string[];
+  /** Template used at creation; may point to a template that has since been deleted. */
+  templateId?: string;
+  /** Template version at creation. Records are never rewritten when a template changes. */
+  templateVersion?: number;
+  /** Shared by every record saved together in class mode. */
+  batchId?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -37,6 +43,32 @@ export type Tag = {
   name: string;
   /** Palette color id, see lib/palette.ts */
   color: string;
+};
+
+export type Template = {
+  id: string;
+  /** Unique, case-insensitive. */
+  name: string;
+  /** Key into the curated template icon set, see components/TemplateIcons.tsx */
+  icon: string;
+  /** Palette color id, same palette as tags. */
+  color: string;
+  /** Linked tags; applied when the template is used. */
+  tagIds: string[];
+  /** e.g. "Chinese: {topic}". Empty means a plain title field. */
+  titlePattern: string;
+  /** Markdown with [[hints]]. */
+  body: string;
+  /** Offer this template when a linked tag is added to a record. */
+  suggestOnTag: boolean;
+  /** Starts at 1; bumps only when titlePattern or body changes. */
+  version: number;
+  /** Set when created from a starter template. */
+  starterKey?: string;
+  usageCount: number;
+  lastUsedAt?: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type SortKey = 'date' | 'child' | 'tag';
@@ -71,11 +103,13 @@ export const DEFAULT_SETTINGS: Settings = {
 /** Shape of a full JSON backup. */
 export type BackupFile = {
   app: 'achieve-it';
-  version: 1;
+  /** 1: original format. 2: adds templates and template fields on achievements. */
+  version: 1 | 2;
   exportedAt: string;
   children: Child[];
   achievements: Achievement[];
   tags: Tag[];
+  templates?: Template[];
   settings?: Settings;
 };
 
@@ -83,5 +117,6 @@ export type DataSnapshot = {
   children: Child[];
   achievements: Achievement[];
   tags: Tag[];
+  templates: Template[];
   settings: Settings;
 };

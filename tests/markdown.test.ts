@@ -21,6 +21,20 @@ describe('renderMarkdown', () => {
   it('returns empty for blank input', () => {
     expect(renderMarkdown('   ')).toBe('');
   });
+
+  it('renders GFM tables', () => {
+    const html = renderMarkdown('| a | b |\n|---|---|\n| 1 | 2 |');
+    expect(html).toContain('<table>');
+    expect(html).toContain('<th>a</th>');
+    expect(html).toContain('<td>2</td>');
+  });
+
+  it('renders hints faded when asked, and escaped brackets literally', () => {
+    const html = renderMarkdown('## Notes\n[[what clicked]] and \\[[kept]]', { hints: true });
+    expect(html).toContain('<span class="md-hint"><span class="visually-hidden">Hint: </span>what clicked</span>');
+    expect(html).toContain('[[kept]]');
+    expect(renderMarkdown('[[raw]]')).toContain('[[raw]]');
+  });
 });
 
 describe('applyFormat', () => {
@@ -50,5 +64,21 @@ describe('applyFormat', () => {
     const r = applyFormat({ text: 'see docs', start: 4, end: 8 }, 'link');
     expect(r.text).toBe('see [docs](https://)');
     expect(r.text.slice(r.start, r.end)).toBe('https://');
+  });
+
+  it('inserts a table skeleton as its own block with the first header cell selected', () => {
+    const r = applyFormat({ text: 'intro', start: 5, end: 5 }, 'table');
+    expect(r.text).toBe('intro\n\n| Column 1 | Column 2 | Column 3 |\n|---|---|---|\n|  |  |  |\n');
+    expect(r.text.slice(r.start, r.end)).toBe('Column 1');
+    const mid = applyFormat({ text: 'a\nb', start: 2, end: 2 }, 'table');
+    expect(mid.text).toBe('a\n\n| Column 1 | Column 2 | Column 3 |\n|---|---|---|\n|  |  |  |\n\nb');
+  });
+
+  it('wraps a selection as a hint', () => {
+    const r = applyFormat({ text: 'the pages read', start: 4, end: 9 }, 'hint');
+    expect(r.text).toBe('the [[pages]] read');
+    expect(r.text.slice(r.start, r.end)).toBe('pages');
+    const empty = applyFormat({ text: '', start: 0, end: 0 }, 'hint');
+    expect(empty.text).toBe('[[hint]]');
   });
 });

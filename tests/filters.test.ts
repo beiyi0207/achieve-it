@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { EMPTY_FILTER, filterAchievements, groupAchievements, queryFromView, sortAchievements, viewFromQuery, type FilterContext } from '../src/lib/filters';
+import { EMPTY_FILTER, NO_TEMPLATE, filterAchievements, groupAchievements, queryFromView, sortAchievements, viewFromQuery, type FilterContext } from '../src/lib/filters';
 import { DEFAULT_SETTINGS, type Achievement, type Child, type Tag } from '../src/types';
 
 const kid = (id: string, first: string, bg = 'ffd166'): Child => ({
@@ -58,6 +58,21 @@ describe('filterAchievements', () => {
     expect(filterAchievements(list, { ...EMPTY_FILTER, range: 'year' }, ctx)).toHaveLength(4);
     expect(filterAchievements(list, { ...EMPTY_FILTER, range: 'custom', from: '2026-08-01', to: '2026-08-31' }, ctx).map((a) => a.id)).toEqual(['2']);
   });
+
+  it('filters by template, "no template" and batch', () => {
+    const stamped: Achievement[] = [
+      { ...list[0], templateId: 'tp1', templateVersion: 1, batchId: 'b1' },
+      { ...list[1], templateId: 'tp2', batchId: 'b1' },
+      list[2],
+    ];
+    const ids = (f: Partial<typeof EMPTY_FILTER>) => filterAchievements(stamped, { ...EMPTY_FILTER, ...f }, ctx).map((a) => a.id);
+    expect(ids({ templateIds: ['tp1'] })).toEqual(['1']);
+    expect(ids({ templateIds: ['tp1', 'tp2'] })).toEqual(['1', '2']);
+    expect(ids({ templateIds: [NO_TEMPLATE] })).toEqual(['3']);
+    expect(ids({ templateIds: [NO_TEMPLATE, 'tp2'] })).toEqual(['2', '3']);
+    expect(ids({ batchId: 'b1' })).toEqual(['1', '2']);
+    expect(ids({ batchId: 'nope' })).toEqual([]);
+  });
 });
 
 describe('sortAchievements', () => {
@@ -105,9 +120,11 @@ describe('groupAchievements', () => {
 
 describe('query round-trip', () => {
   it('parses and serialises the view, omitting defaults', () => {
-    const q = new URLSearchParams('q=goal&child=a,b&tag=t-sport&range=custom&from=2026-01-01&group=none&sort=child&dir=asc');
+    const q = new URLSearchParams('q=goal&child=a,b&tag=t-sport&template=tp1,none&batch=b1&range=custom&from=2026-01-01&group=none&sort=child&dir=asc');
     const view = viewFromQuery(q, DEFAULT_SETTINGS);
     expect(view.filter.childIds).toEqual(['a', 'b']);
+    expect(view.filter.templateIds).toEqual(['tp1', 'none']);
+    expect(view.filter.batchId).toBe('b1');
     expect(view.filter.range).toBe('custom');
     expect(view.groupBy).toBe('none');
     expect(view.sort).toEqual({ sort: 'child', direction: 'asc' });

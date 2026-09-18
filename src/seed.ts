@@ -66,5 +66,5 @@ export function buildSeed(now = new Date()): DataSnapshot {
     });
   }
 
-  return { children: kids, achievements, tags, settings: { ...DEFAULT_SETTINGS, termDates: [] } };
+  return { children: kids, achievements, tags, templates: [], settings: { ...DEFAULT_SETTINGS, termDates: [] } };
 }

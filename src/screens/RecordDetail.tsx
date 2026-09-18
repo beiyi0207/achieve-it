@@ -3,7 +3,7 @@ import { Header } from '../components/Header';
 import { Avatar } from '../components/Avatar';
 import { TagChip } from '../components/TagChip';
 import { IconBack, IconCopy, IconEdit } from '../components/Icons';
-import { L, achievements, childById, childName, tagById } from '../store';
+import { L, achievements, childById, childName, tagById, templateById } from '../store';
 import { back } from '../router';
 import { formatDate, formatDateTime } from '../lib/dates';
 import { renderMarkdown } from '../lib/markdown';
@@ -35,6 +35,8 @@ export function RecordDetailScreen({ achievementId }: Props) {
 
   const child = childById.value.get(a.childId);
   const tags = a.tags.map((id) => tagById.value.get(id)).filter((t): t is NonNullable<typeof t> => !!t);
+  const template = a.templateId ? templateById.value.get(a.templateId) : undefined;
+  const batchSize = a.batchId ? achievements.value.filter((x) => x.batchId === a.batchId).length : 0;
 
   return (
     <>
@@ -64,8 +66,18 @@ export function RecordDetailScreen({ achievementId }: Props) {
           <div class="grow">
             <div class="list-row__title">{childName(child)}</div>
             <div class="list-row__sub">{formatDate(a.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</div>
+            {a.templateId && (
+              <div class="list-row__sub">
+                {template ? `Made with ${template.name}${a.templateVersion ? ` v${a.templateVersion}` : ''}` : 'Made with a deleted template'}
+              </div>
+            )}
           </div>
         </a>
+        {a.batchId && batchSize > 1 && (
+          <p class="muted small" style={{ margin: 0 }}>
+            Part of a class record · <a href={`#/records?batch=${a.batchId}`}>See all {batchSize}</a>
+          </p>
+        )}
         {tags.length > 0 && (
           <div class="chip-row">
             {tags.map((t) => (

@@ -21,7 +21,7 @@ function selectData(s: DataSnapshot, o: ExportOptions, ctx: Pick<FilterContext, 
   const childSet = new Set(children.map((c) => c.id));
   const achievements = filterAchievements(
     s.achievements,
-    { q: '', childIds: o.childIds, tagIds: [], range: o.range, from: o.from, to: o.to },
+    { q: '', childIds: o.childIds, tagIds: [], templateIds: [], range: o.range, from: o.from, to: o.to },
     { children: new Map(children.map((c) => [c.id, c])), tags: new Map(), terms: ctx.terms, now: ctx.now },
   ).filter((a) => !o.childIds.length || childSet.has(a.childId));
   return { children, achievements };
@@ -38,12 +38,14 @@ export function buildBackup(s: DataSnapshot, o: ExportOptions, ctx: Pick<FilterC
   });
   return {
     app: 'achieve-it',
-    version: 1,
+    version: 2,
     exportedAt: new Date().toISOString(),
     children: outChildren as Child[],
     achievements,
     // A partial export only carries the tags it references; a full one carries all.
     tags: partial ? s.tags.filter((t) => usedTags.has(t.id)) : s.tags,
+    // Templates are small and useful on their own, so every backup carries all of them.
+    templates: s.templates,
     settings: partial ? undefined : s.settings,
   };
 }
@@ -57,7 +59,8 @@ export function buildCsv(s: DataSnapshot, o: ExportOptions, ctx: Pick<FilterCont
   const { children, achievements } = selectData(s, o, ctx);
   const childMap = new Map(children.map((c) => [c.id, c]));
   const tagMap = new Map(s.tags.map((t) => [t.id, t]));
-  const header = ['date', 'child_first_name', 'child_last_name', 'child_age', 'title', 'tags', 'description', 'record_id', 'child_id'];
+  const templateMap = new Map(s.templates.map((t) => [t.id, t]));
+  const header = ['date', 'child_first_name', 'child_last_name', 'child_age', 'title', 'tags', 'description', 'record_id', 'child_id', 'template'];
   const rows = [...achievements]
     .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
     .map((a: Achievement) => {
@@ -72,6 +75,8 @@ export function buildCsv(s: DataSnapshot, o: ExportOptions, ctx: Pick<FilterCont
         a.description,
         a.id,
         a.childId,
+        // Template name at export time; blank if none or since deleted.
+        (a.templateId && templateMap.get(a.templateId)?.name) || '',
       ]
         .map(csvCell)
         .join(',');

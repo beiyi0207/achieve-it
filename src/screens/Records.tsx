@@ -6,9 +6,10 @@ import { SegmentedControl } from '../components/SegmentedControl';
 import { EmptyState } from '../components/EmptyState';
 import { Dialog } from '../components/Dialog';
 import { IconCheck, IconChevron, IconFilter, IconSearch, IconSort, IconX } from '../components/Icons';
-import { L, achievements, childById, childName, settings, sortedChildren, sortedTags, tagById } from '../store';
+import { L, achievements, childById, childName, settings, sortedChildren, sortedTags, sortedTemplates, tagById, templateById } from '../store';
 import { navigate, useRoute } from '../router';
-import { filterAchievements, groupAchievements, queryFromView, sortAchievements, viewFromQuery, type RecordFilter, type RecordView } from '../lib/filters';
+import { NO_TEMPLATE, filterAchievements, groupAchievements, queryFromView, sortAchievements, viewFromQuery, type RecordFilter, type RecordView } from '../lib/filters';
+import { TemplateTile } from '../components/TemplateIcons';
 import { formatDate, type RangePreset } from '../lib/dates';
 import type { GroupBy, SortDirection, SortKey } from '../types';
 
@@ -56,6 +57,12 @@ export function RecordsScreen() {
       label: tagById.value.get(id)?.name ?? 'Unknown tag',
       onClear: () => setFilter({ tagIds: f.tagIds.filter((x) => x !== id) }),
     })),
+    ...f.templateIds.map((id) => ({
+      key: `tp-${id}`,
+      label: id === NO_TEMPLATE ? 'No template' : templateById.value.get(id)?.name ?? 'Deleted template',
+      onClear: () => setFilter({ templateIds: f.templateIds.filter((x) => x !== id) }),
+    })),
+    ...(f.batchId ? [{ key: 'batch', label: 'Class record', onClear: () => setFilter({ batchId: undefined }) }] : []),
     ...(f.range !== 'all'
       ? [
           {
@@ -107,7 +114,11 @@ export function RecordsScreen() {
               </button>
             ))}
             {activeChips.length > 1 && (
-              <button type="button" class="chip" onClick={() => setFilter({ childIds: [], tagIds: [], range: 'all', from: undefined, to: undefined })}>
+              <button
+                type="button"
+                class="chip"
+                onClick={() => setFilter({ childIds: [], tagIds: [], templateIds: [], batchId: undefined, range: 'all', from: undefined, to: undefined })}
+              >
                 Clear all
               </button>
             )}
@@ -241,6 +252,39 @@ export function RecordsScreen() {
           {sortedTags.value.length === 0 && <span class="muted small">No tags yet.</span>}
         </div>
 
+        {sortedTemplates.value.length > 0 && (
+          <>
+            <h2>Template</h2>
+            <div class="chip-row">
+              {sortedTemplates.value.map((t) => {
+                const on = f.templateIds.includes(t.id);
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    class={`chip tpl-chip ${on ? 'chip--active' : ''}`}
+                    aria-pressed={on}
+                    onClick={() => setFilter({ templateIds: on ? f.templateIds.filter((x) => x !== t.id) : [...f.templateIds, t.id] })}
+                  >
+                    <TemplateTile template={t} size={20} />
+                    {t.name}
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                class={`chip ${f.templateIds.includes(NO_TEMPLATE) ? 'chip--active' : ''}`}
+                aria-pressed={f.templateIds.includes(NO_TEMPLATE)}
+                onClick={() =>
+                  setFilter({ templateIds: f.templateIds.includes(NO_TEMPLATE) ? f.templateIds.filter((x) => x !== NO_TEMPLATE) : [...f.templateIds, NO_TEMPLATE] })
+                }
+              >
+                No template
+              </button>
+            </div>
+          </>
+        )}
+
         <h2>Dates</h2>
         <div class="chip-row">
           {(['week', 'month', 'term', 'year', 'all', 'custom'] as RangePreset[]).map((r) => {
@@ -280,7 +324,11 @@ export function RecordsScreen() {
         )}
 
         <div class="row">
-          <button type="button" class="btn btn--ghost" onClick={() => setFilter({ childIds: [], tagIds: [], range: 'all', from: undefined, to: undefined })}>
+          <button
+            type="button"
+            class="btn btn--ghost"
+            onClick={() => setFilter({ childIds: [], tagIds: [], templateIds: [], batchId: undefined, range: 'all', from: undefined, to: undefined })}
+          >
             Clear
           </button>
           <button type="button" class="btn btn--primary" onClick={() => setFilterOpen(false)}>

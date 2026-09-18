@@ -1,5 +1,6 @@
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import { hintsToPreviewMarkdown } from './templateHints';
 
 marked.use({ gfm: true, breaks: true });
 
@@ -12,14 +13,20 @@ if (typeof window !== 'undefined') {
   });
 }
 
-/** Markdown → sanitised HTML. Always use this; never render raw markdown output. */
-export function renderMarkdown(md: string): string {
+/**
+ * Markdown → sanitised HTML. Always use this; never render raw markdown output.
+ * With `hints`, template `[[hints]]` render faded without their brackets.
+ */
+export function renderMarkdown(md: string, opts: { hints?: boolean } = {}): string {
   if (!md.trim()) return '';
-  const html = marked.parse(md, { async: false }) as string;
+  const source = opts.hints ? hintsToPreviewMarkdown(md) : md;
+  const html = marked.parse(source, { async: false }) as string;
   return DOMPurify.sanitize(html, { USE_PROFILES: { html: true }, FORBID_TAGS: ['style', 'img'] });
 }
 
-export type FormatKind = 'h1' | 'h2' | 'bold' | 'italic' | 'ul' | 'ol' | 'link';
+export type FormatKind = 'h1' | 'h2' | 'bold' | 'italic' | 'ul' | 'ol' | 'link' | 'table' | 'hint';
+
+const TABLE_SKELETON = '| Column 1 | Column 2 | Column 3 |\n|---|---|---|\n|  |  |  |';
 
 export type TextSelection = { text: string; start: number; end: number };
 
@@ -81,6 +88,20 @@ export function applyFormat(sel: TextSelection, kind: FormatKind): TextSelection
       const replaced = `[${label}](${url})`;
       const urlStart = start + label.length + 3;
       return { text: text.slice(0, start) + replaced + text.slice(end), start: urlStart, end: urlStart + url.length };
+    }
+    case 'table': {
+      // Insert a 3-column skeleton as its own block, with the first header cell selected.
+      const before = text.slice(0, start);
+      const after = text.slice(end);
+      const prefix = before === '' || before.endsWith('\n\n') ? '' : before.endsWith('\n') ? '\n' : '\n\n';
+      const suffix = after === '' ? '\n' : after.startsWith('\n\n') ? '' : after.startsWith('\n') ? '\n' : '\n\n';
+      const selStart = start + prefix.length + 2;
+      return { text: before + prefix + TABLE_SKELETON + suffix + after, start: selStart, end: selStart + 'Column 1'.length };
+    }
+    case 'hint': {
+      const selected = text.slice(start, end) || 'hint';
+      const replaced = `[[${selected}]]`;
+      return { text: text.slice(0, start) + replaced + text.slice(end), start: start + 2, end: start + 2 + selected.length };
     }
   }
 }

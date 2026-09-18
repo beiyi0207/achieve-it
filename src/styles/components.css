@@ -1284,3 +1284,178 @@ dialog::backdrop {
   border-color: var(--accent);
   color: var(--accent);
 }
+
+/* ---------- Template hints in the markdown editor ---------- */
+/* Write mode: a styled backdrop sits under a transparent-text textarea so hints can be muted. */
+.md-write {
+  position: relative;
+  background: var(--surface);
+  border-radius: var(--radius);
+}
+
+.md-backdrop,
+.textarea--hints {
+  font-family: var(--mono);
+  font-size: 16px;
+  line-height: 1.5;
+  padding: 10px 14px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  tab-size: 4;
+}
+
+.md-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 1px solid transparent;
+  color: var(--text);
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.textarea--hints {
+  position: relative;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--text);
+  resize: none;
+  overflow: hidden;
+}
+
+.textarea--hints::placeholder {
+  color: var(--text-3);
+}
+
+.textarea--hints::selection {
+  background: var(--accent-soft);
+}
+
+.md-hint-mark {
+  background: var(--surface-2);
+  color: var(--text-3);
+  border-radius: 3px;
+}
+
+/* Preview and record detail: hints render faded without brackets. */
+.md-hint {
+  color: var(--text-3);
+  font-style: italic;
+}
+
+/* Tables scroll inside their own container on narrow screens. */
+.markdown table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.markdown table th,
+.markdown table td {
+  white-space: normal;
+  min-width: 80px;
+}
+
+.md-tool--hint {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+/* ---------- Templates ---------- */
+.tpl-tile {
+  --tag: var(--text-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--tag) 18%, var(--surface));
+  color: var(--tag);
+}
+
+.tpl-tile-btn {
+  border-radius: 12px;
+  flex: 0 0 auto;
+}
+
+.tpl-tile-btn:active {
+  opacity: 0.8;
+}
+
+.tpl-add {
+  width: auto;
+  min-height: 40px;
+  padding: 0 16px;
+  flex: 0 0 auto;
+}
+
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+  gap: 8px;
+}
+
+.icon-grid button {
+  aspect-ratio: 1;
+  min-height: 56px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-grid button[aria-pressed='true'] {
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+/* ---------- Achievement editor: templates & class mode ---------- */
+.banner--info {
+  flex-direction: row;
+  align-items: center;
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  color: var(--text);
+}
+
+.tpl-chip {
+  padding-left: 6px;
+}
+
+.tpl-chip .tpl-tile {
+  border-radius: 6px;
+}
+
+.suggest {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 6px 6px 12px;
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  font-size: 14px;
+}
+
+.link-btn {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: inherit;
+}
+
+.text-btn.small {
+  font-size: 13px;
+}
+
+/* Chips in a scrolling row keep their size; the row scrolls instead. */
+.chip-scroll > .chip {
+  flex: 0 0 auto;
+}
+
+.tpl-chip {
+  max-width: 200px;
+}

@@ -1,4 +1,4 @@
-import type { Achievement, BackupFile, Child, DataSnapshot, Tag } from '../types';
+import type { Achievement, BackupFile, Child, DataSnapshot, Tag, Template } from '../types';
 import { normaliseSettings } from '../db';
 import { DEFAULT_STYLE, randomConfig } from './avatar';
 import { isValidIsoDate } from './dates';
@@ -42,21 +42,51 @@ function normTag(raw: unknown): Tag | null {
   return { id: raw.id, name: raw.name, color: str(raw.color, 'slate') };
 }
 
+const strList = (v: unknown): string[] => (Array.isArray(v) ? v.filter((t): t is string => typeof t === 'string') : []);
+
 function normAchievement(raw: unknown): Achievement | null {
   if (!isObj(raw) || typeof raw.id !== 'string' || typeof raw.childId !== 'string') return null;
   const date = str(raw.date).slice(0, 10);
   if (!isValidIsoDate(date)) return null;
   const now = new Date().toISOString();
-  return {
+  const a: Achievement = {
     id: raw.id,
     childId: raw.childId,
     title: str(raw.title),
     description: str(raw.description),
     date,
-    tags: Array.isArray(raw.tags) ? raw.tags.filter((t): t is string => typeof t === 'string') : [],
+    tags: strList(raw.tags),
     createdAt: str(raw.createdAt) || now,
     updatedAt: str(raw.updatedAt) || str(raw.createdAt) || now,
   };
+  if (typeof raw.templateId === 'string' && raw.templateId) a.templateId = raw.templateId;
+  if (typeof raw.templateVersion === 'number' && Number.isFinite(raw.templateVersion)) a.templateVersion = raw.templateVersion;
+  if (typeof raw.batchId === 'string' && raw.batchId) a.batchId = raw.batchId;
+  return a;
+}
+
+function normTemplate(raw: unknown): Template | null {
+  if (!isObj(raw) || typeof raw.id !== 'string' || typeof raw.name !== 'string' || !raw.name.trim()) return null;
+  const now = new Date().toISOString();
+  const version = Number(raw.version);
+  const usage = Number(raw.usageCount);
+  const t: Template = {
+    id: raw.id,
+    name: raw.name.trim(),
+    icon: str(raw.icon, 'template'),
+    color: str(raw.color, 'slate'),
+    tagIds: strList(raw.tagIds),
+    titlePattern: str(raw.titlePattern),
+    body: str(raw.body),
+    suggestOnTag: raw.suggestOnTag !== false,
+    version: Number.isInteger(version) && version >= 1 ? version : 1,
+    usageCount: Number.isInteger(usage) && usage >= 0 ? usage : 0,
+    createdAt: str(raw.createdAt) || now,
+    updatedAt: str(raw.updatedAt) || str(raw.createdAt) || now,
+  };
+  if (typeof raw.starterKey === 'string' && raw.starterKey) t.starterKey = raw.starterKey;
+  if (typeof raw.lastUsedAt === 'string' && raw.lastUsedAt) t.lastUsedAt = raw.lastUsedAt;
+  return t;
 }
 
 /** Validate and normalise a JSON backup. Tolerates missing optional fields; rejects anything that is not our format. */
@@ -71,7 +101,7 @@ export function parseBackup(text: string): ParsedBackup {
   if (json.app !== 'achieve-it' || !Array.isArray(json.children) || !Array.isArray(json.achievements)) {
     return { ok: false, error: 'This file is not an Achievement tracker backup.' };
   }
-  if (typeof json.version === 'number' && json.version > 1) {
+  if (typeof json.version === 'number' && json.version > 2) {
     return { ok: false, error: 'This backup was made by a newer version of the app.' };
   }
   const children = json.children.map(normChild).filter((c): c is Child => !!c);
@@ -81,14 +111,28 @@ export function parseBackup(text: string): ParsedBackup {
     .map(normAchievement)
     .filter((a): a is Achievement => !!a)
     .map((a) => ({ ...a, tags: a.tags.filter((t) => tagIds.has(t)) }));
+  const seenNames = new Set<string>();
+  const templates = (Array.isArray(json.templates) ? json.templates : [])
+    .map(normTemplate)
+    .filter((t): t is Template => !!t)
+    // Names are unique; the first occurrence wins.
+    .filter((t) => {
+      const key = t.name.toLowerCase();
+      if (seenNames.has(key)) return false;
+      seenNames.add(key);
+      return true;
+    })
+    .map((t) => ({ ...t, tagIds: t.tagIds.filter((id) => tagIds.has(id)) }));
   const settings = normaliseSettings(isObj(json.settings) ? (json.settings as never) : undefined);
-  return { ok: true, data: { children, achievements, tags, settings }, source: json as unknown as BackupFile };
+  return { ok: true, data: { children, achievements, tags, templates, settings }, source: json as unknown as BackupFile };
 }
 
 /**
  * Merge an imported snapshot into the current one.
  * - Children and tags are matched by id; tags also by name (case-insensitive) so duplicates collapse.
  * - Achievements are matched by id; the newer updatedAt wins.
+ * - Templates are matched by id; an incoming template whose name clashes with a different
+ *   existing template is renamed "{name} (imported)".
  * - Settings are kept from the current data.
  */
 export function mergeSnapshots(current: DataSnapshot, incoming: DataSnapshot): DataSnapshot {
@@ -116,10 +160,25 @@ export function mergeSnapshots(current: DataSnapshot, incoming: DataSnapshot): D
     if (!existing || a.updatedAt > existing.updatedAt) achievements.set(a.id, a);
   }
 
+  const templates = new Map(current.templates.map((t) => [t.id, t]));
+  const templateNames = new Set(current.templates.map((t) => t.name.toLowerCase()));
+  for (const raw of incoming.templates ?? []) {
+    if (templates.has(raw.id)) continue;
+    let name = raw.name;
+    if (templateNames.has(name.toLowerCase())) {
+      name = `${raw.name} (imported)`;
+      for (let i = 2; templateNames.has(name.toLowerCase()); i++) name = `${raw.name} (imported ${i})`;
+    }
+    const t = { ...raw, name, tagIds: Array.from(new Set(raw.tagIds.map((id) => remap.get(id) ?? id))) };
+    templates.set(t.id, t);
+    templateNames.add(name.toLowerCase());
+  }
+
   return {
     children: [...children.values()],
     achievements: [...achievements.values()],
     tags: [...tags.values()],
+    templates: [...templates.values()],
     settings: current.settings,
   };
 }

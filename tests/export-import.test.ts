@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildBackup, buildCsv, DEFAULT_EXPORT, exportFilename } from '../src/lib/export';
 import { mergeSnapshots, parseBackup } from '../src/lib/import';
-import { DEFAULT_SETTINGS, type Achievement, type Child, type DataSnapshot, type Tag } from '../src/types';
+import { DEFAULT_SETTINGS, type Achievement, type Child, type DataSnapshot, type Tag, type Template } from '../src/types';
 
 const kid = (id: string, first: string): Child => ({
   id,
@@ -28,10 +28,31 @@ const tags: Tag[] = [
   { id: 't2', name: 'Sport', color: 'green' },
 ];
 
+const tpl = (id: string, name: string, extra: Partial<Template> = {}): Template => ({
+  id,
+  name,
+  icon: 'book',
+  color: 'blue',
+  tagIds: ['t1'],
+  titlePattern: 'Read {book}',
+  body: '## Book\n[[title]]',
+  suggestOnTag: true,
+  version: 1,
+  usageCount: 0,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  updatedAt: '2026-01-01T00:00:00.000Z',
+  ...extra,
+});
+
 const snap: DataSnapshot = {
   children: [kid('a', 'Ana'), kid('b', 'Ben')],
-  achievements: [rec('1', 'a', '2026-09-01', ['t1']), rec('2', 'b', '2026-03-01', ['t2']), rec('3', 'a', '2025-12-25')],
+  achievements: [
+    { ...rec('1', 'a', '2026-09-01', ['t1']), templateId: 'tp1', templateVersion: 1, batchId: 'batch-1' },
+    rec('2', 'b', '2026-03-01', ['t2']),
+    { ...rec('3', 'a', '2025-12-25'), templateId: 'gone', templateVersion: 2 },
+  ],
   tags,
+  templates: [tpl('tp1', 'Reading log')],
   settings: { ...DEFAULT_SETTINGS, showAges: false },
 };
 
@@ -42,6 +63,8 @@ describe('buildBackup', () => {
     expect(b.children).toHaveLength(2);
     expect(b.achievements).toHaveLength(3);
     expect(b.tags).toHaveLength(2);
+    expect(b.templates).toHaveLength(1);
+    expect(b.version).toBe(2);
     expect(b.settings?.showAges).toBe(false);
   });
 
@@ -63,11 +86,18 @@ describe('buildCsv', () => {
   it('escapes quotes, commas and newlines', () => {
     const csv = buildCsv(snap, { ...DEFAULT_EXPORT, format: 'csv' });
     const lines = csv.split('\r\n');
-    expect(lines[0]).toBe('date,child_first_name,child_last_name,child_age,title,tags,description,record_id,child_id');
+    expect(lines[0]).toBe('date,child_first_name,child_last_name,child_age,title,tags,description,record_id,child_id,template');
     expect(lines[1]).toContain('"Title, with ""quotes"" 1"');
     expect(lines[1]).toContain('"line one\nline two"');
     expect(lines[1]).toContain('Reading');
     expect(csv).toMatch(/\r\n$/);
+  });
+
+  it('adds the template name, blank when none or deleted', () => {
+    const lines = buildCsv(snap, { ...DEFAULT_EXPORT, format: 'csv' }).split('\r\n');
+    expect(lines[1].endsWith(',Reading log')).toBe(true); // record 1 (newest)
+    expect(lines[2].endsWith(',b,')).toBe(true); // record 2, no template
+    expect(lines[3].endsWith(',a,')).toBe(true); // record 3, deleted template
   });
 
   it('names files by format and date', () => {
@@ -84,7 +114,36 @@ describe('parseBackup', () => {
     if (!p.ok) return;
     expect(p.data.children).toHaveLength(2);
     expect(p.data.achievements).toHaveLength(3);
+    expect(p.data.templates).toHaveLength(1);
+    expect(p.data.achievements[0]).toMatchObject({ templateId: 'tp1', templateVersion: 1, batchId: 'batch-1' });
     expect(p.data.settings.showAges).toBe(false);
+  });
+
+  it('accepts version 1 backups without templates and rejects newer ones', () => {
+    const v1 = parseBackup(JSON.stringify({ app: 'achieve-it', version: 1, children: [], achievements: [], tags: [] }));
+    expect(v1.ok && v1.data.templates).toEqual([]);
+    expect(parseBackup(JSON.stringify({ app: 'achieve-it', version: 3, children: [], achievements: [] })).ok).toBe(false);
+  });
+
+  it('normalises templates and drops duplicate names and unknown tags', () => {
+    const p = parseBackup(
+      JSON.stringify({
+        app: 'achieve-it',
+        version: 2,
+        children: [],
+        achievements: [],
+        tags: [{ id: 't1', name: 'Reading', color: 'blue' }],
+        templates: [
+          { id: 'a', name: 'One', tagIds: ['t1', 'nope'], version: 0, usageCount: -2 },
+          { id: 'b', name: 'one' },
+          { id: 'c' },
+        ],
+      }),
+    );
+    expect(p.ok).toBe(true);
+    if (!p.ok) return;
+    expect(p.data.templates.map((t) => t.id)).toEqual(['a']);
+    expect(p.data.templates[0]).toMatchObject({ tagIds: ['t1'], version: 1, usageCount: 0, suggestOnTag: true, icon: 'template', body: '' });
   });
 
   it('rejects non-backups', () => {
@@ -123,6 +182,7 @@ describe('mergeSnapshots', () => {
         { id: 't1', name: 'Reading', color: 'blue' },
         { id: 't-other', name: 'sport', color: 'red' }, // same name as t2, different id
       ],
+      templates: [],
       settings: { ...DEFAULT_SETTINGS, showAges: true },
     };
     const m = mergeSnapshots(snap, incoming);
@@ -133,5 +193,25 @@ describe('mergeSnapshots', () => {
     expect(m.achievements.find((a) => a.id === '9')?.tags).toEqual(['t2']);
     expect(m.tags).toHaveLength(2);
     expect(m.settings.showAges).toBe(false);
+  });
+
+  it('merges templates by id, renames name clashes and remaps merged tags', () => {
+    const incoming: DataSnapshot = {
+      children: [],
+      achievements: [],
+      tags: [{ id: 't-other', name: 'Sport', color: 'red' }],
+      templates: [
+        tpl('tp1', 'Reading log renamed', { body: 'changed' }), // same id: existing wins
+        tpl('tp2', 'reading LOG', { tagIds: ['t-other'] }), // name clash, different id
+        tpl('tp3', 'Sports milestone', { tagIds: ['t-other'] }),
+      ],
+      settings: DEFAULT_SETTINGS,
+    };
+    const m = mergeSnapshots(snap, incoming);
+    const byId = new Map(m.templates.map((t) => [t.id, t]));
+    expect(byId.get('tp1')?.name).toBe('Reading log');
+    expect(byId.get('tp2')?.name).toBe('reading LOG (imported)');
+    expect(byId.get('tp2')?.tagIds).toEqual(['t2']);
+    expect(byId.get('tp3')?.tagIds).toEqual(['t2']);
   });
 });
