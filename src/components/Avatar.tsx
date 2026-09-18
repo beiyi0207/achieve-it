@@ -1,7 +1,7 @@
 import { useMemo } from 'preact/hooks';
 import type { AvatarConfig } from '../types';
 import { initials, renderAvatarSvg } from '../lib/avatar';
-import { cssHex } from '../lib/palette';
+import { cssHex } from '../core/palette';
 
 type Props = {
   config?: AvatarConfig;

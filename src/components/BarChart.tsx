@@ -1,5 +1,5 @@
-import { monthShort } from '../lib/dates';
-import type { MonthCount } from '../lib/stats';
+import { monthShort } from '../core/dates';
+import type { MonthCount } from '../core/stats';
 
 type Props = {
   data: MonthCount[];

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { customTokens, hasTokens, parseTokens, resolveTitle, tidyTitle, tokenDate, tokenLabel } from '../src/lib/templateTokens';
+import { customTokens, hasTokens, parseTokens, resolveTitle, tidyTitle, tokenDate, tokenLabel } from '../src/core/templateTokens';
 
 describe('parseTokens', () => {
   it('lists unique tokens in order of first appearance', () => {

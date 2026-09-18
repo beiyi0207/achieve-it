@@ -42,6 +42,28 @@ type Achievement = {
   description: string;   // markdown
   date: string;          // ISO date (YYYY-MM-DD)
   tags: string[];        // tag ids
+  templateId?: string;   // template used at creation; may point to a deleted template
+  templateVersion?: number;
+  batchId?: string;      // shared by records saved together in class mode
+  source?: "user" | "claude";  // absent means "user"; set by the connector
+  createdAt: string;
+  updatedAt: string;
+};
+
+type Template = {        // see "Templates and class mode"
+  id: string;
+  name: string;          // unique, case-insensitive
+  icon: string;          // key into the curated icon set
+  color: string;         // tag palette id
+  tagIds: string[];
+  titlePattern: string;  // "Chinese: {topic}"; empty = plain title
+  body: string;          // markdown with [[hints]]
+  suggestOnTag: boolean;
+  version: number;       // bumps only when titlePattern or body changes
+  history?: { version: number; titlePattern: string; body: string; changedAt: string }[];
+  starterKey?: string;
+  usageCount: number;
+  lastUsedAt?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -148,9 +170,30 @@ Bottom tab bar: **Kids · Records · [+] · Stats · Settings**. The center `+` 
 - Touch targets ≥ 44px. Single column layout; max two columns for cards.
 - Offline: all screens function without a network after first load.
 
+## Templates and class mode
+
+Specified in "Feature Spec: Templates and Class Mode" (Claude Doc) and built. In short: a template stamps a record with linked tags, a title pattern with `{tokens}` and a markdown body with `[[hints]]`; untouched hints, and the empty items, rows and sections they leave behind, are stripped on save. Class mode saves one record per selected kid from one form, with per-kid notes under a "Notes" heading and a shared `batchId`. Templates are stamps, not links: a record keeps the `templateVersion` it was made with and is never rewritten.
+
+## Connector plan (MCP)
+
+Goal: let Claude read the data to summarise it, and later create and update records, but never delete.
+
+Decisions
+
+- The **backup JSON is the contract** between the app and anything outside the browser. It is versioned (`version` field), documented in `docs/data-format.md`, and every export carries `settings` (labels and term dates) because summaries need them.
+- **Pure logic lives in `src/core/`** and imports nothing from the DOM, Preact, IndexedDB, DiceBear or the markdown renderer. The connector runs the same hint stripping, filters, stats and backup parsing as the app. A test enforces the boundary.
+- Records created or changed by Claude carry `source: "claude"`; the app shows "Added by Claude" and can filter on it.
+- Templates keep a `history` of earlier title patterns and bodies so records made with older versions can still be grouped by section.
+- Age was removed from the child model: it goes stale and summaries cannot rely on it.
+- Claude never deletes. There is no delete tool, and the credential it uses must not permit deletes server-side once there is a server.
+
+Step 1 (done with this spec): the format and core clean-up plus a **local, file-based MCP server** in `mcp/`. It reads an exported backup and answers `list_children`, `list_tags`, `list_templates`, `list_achievements`, `get_achievement` and `get_stats`. `add_achievement` and `update_achievement` write a changes file in backup format that the user imports with Merge. Runs with Claude Desktop or Claude Code on the same machine; no auth, no server.
+
+Step 2 (later): a hosted backend so claude.ai on a phone can use the connector. Cloudflare Workers plus D1 as the source of truth, a `DataStore` implementation in the PWA that syncs (offline queue, last-writer-wins by `updatedAt`, tombstones so the user's own deletions propagate), a login for the single adult user, and OAuth for the connector. The tools stay the same.
+
 ## Non-goals (v1)
 
-- User authentication or multi-device sync.
+- User authentication or multi-device sync (planned for connector step 2).
 - Child-facing views or logins.
 - Photo/image uploads.
 - Push notifications.

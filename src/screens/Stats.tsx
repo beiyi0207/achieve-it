@@ -11,10 +11,10 @@ import { TagChip } from '../components/TagChip';
 import { IconCheck, IconX } from '../components/Icons';
 import { L, achievements, childById, childName, children, settings, sortedChildren, tags } from '../store';
 import { navigate, useRoute } from '../router';
-import { computeStats, monthRange } from '../lib/stats';
-import { formatDate, monthLabel, rangeFor, type RangePreset } from '../lib/dates';
-import { recordsHref } from '../lib/filters';
-import { cssHex, tagHex } from '../lib/palette';
+import { computeStats, monthRange } from '../core/stats';
+import { formatDate, monthLabel, rangeFor, type RangePreset } from '../core/dates';
+import { recordsHref } from '../core/filters';
+import { cssHex, tagHex } from '../core/palette';
 
 type StatsRange = 'month' | 'term' | 'year' | 'all';
 

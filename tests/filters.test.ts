@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { EMPTY_FILTER, NO_TEMPLATE, filterAchievements, groupAchievements, queryFromView, sortAchievements, viewFromQuery, type FilterContext } from '../src/lib/filters';
+import { EMPTY_FILTER, NO_TEMPLATE, filterAchievements, groupAchievements, queryFromView, sortAchievements, viewFromQuery, type FilterContext } from '../src/core/filters';
 import { DEFAULT_SETTINGS, type Achievement, type Child, type Tag } from '../src/types';
 
 const kid = (id: string, first: string, bg = 'ffd166'): Child => ({
@@ -72,6 +72,14 @@ describe('filterAchievements', () => {
     expect(ids({ batchId: 'b1' })).toEqual(['1', '2']);
     expect(ids({ batchId: 'nope' })).toEqual([]);
   });
+
+  it('filters by source, treating a missing source as the user', () => {
+    const mixed: Achievement[] = [{ ...list[0], source: 'claude' }, list[1]];
+    const ids = (f: Partial<typeof EMPTY_FILTER>) => filterAchievements(mixed, { ...EMPTY_FILTER, ...f }, ctx).map((a) => a.id);
+    expect(ids({ source: 'claude' })).toEqual(['1']);
+    expect(ids({ source: 'user' })).toEqual(['2']);
+    expect(ids({})).toEqual(['1', '2']);
+  });
 });
 
 describe('sortAchievements', () => {
@@ -119,11 +127,12 @@ describe('groupAchievements', () => {
 
 describe('query round-trip', () => {
   it('parses and serialises the view, omitting defaults', () => {
-    const q = new URLSearchParams('q=goal&child=a,b&tag=t-sport&template=tp1,none&batch=b1&range=custom&from=2026-01-01&group=none&sort=child&dir=asc');
+    const q = new URLSearchParams('q=goal&child=a,b&tag=t-sport&template=tp1,none&batch=b1&source=claude&range=custom&from=2026-01-01&group=none&sort=child&dir=asc');
     const view = viewFromQuery(q, DEFAULT_SETTINGS);
     expect(view.filter.childIds).toEqual(['a', 'b']);
     expect(view.filter.templateIds).toEqual(['tp1', 'none']);
     expect(view.filter.batchId).toBe('b1');
+    expect(view.filter.source).toBe('claude');
     expect(view.filter.range).toBe('custom');
     expect(view.groupBy).toBe('none');
     expect(view.sort).toEqual({ sort: 'child', direction: 'asc' });

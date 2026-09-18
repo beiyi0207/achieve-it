@@ -5,7 +5,7 @@ import { TagChip } from '../components/TagChip';
 import { IconBack, IconCopy, IconEdit } from '../components/Icons';
 import { L, achievements, childById, childName, tagById, templateById } from '../store';
 import { back } from '../router';
-import { formatDate, formatDateTime } from '../lib/dates';
+import { formatDate, formatDateTime } from '../core/dates';
 import { renderMarkdown } from '../lib/markdown';
 
 type Props = { achievementId: string };
@@ -69,6 +69,11 @@ export function RecordDetailScreen({ achievementId }: Props) {
             {a.templateId && (
               <div class="list-row__sub">
                 {template ? `Made with ${template.name}${a.templateVersion ? ` v${a.templateVersion}` : ''}` : 'Made with a deleted template'}
+              </div>
+            )}
+            {a.source === 'claude' && (
+              <div class="list-row__sub">
+                <a href="#/records?source=claude">Added by Claude</a>
               </div>
             )}
           </div>

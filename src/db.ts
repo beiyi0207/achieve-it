@@ -1,6 +1,6 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
-import { normaliseLabels } from './lib/labels';
-import { DEFAULT_SETTINGS, type Achievement, type Child, type DataSnapshot, type Settings, type Tag, type Template } from './types';
+import { normaliseSettings } from './core/settings';
+import { type Achievement, type Child, type DataSnapshot, type Settings, type Tag, type Template } from './types';
 
 /**
  * The only interface the UI talks to. Swap the implementation to move to a
@@ -177,18 +177,6 @@ export class IndexedDbStore implements DataStore {
     const tx = this.conn.transaction(ALL_STORES, 'readwrite');
     await Promise.all([...ALL_STORES.map((name) => tx.objectStore(name).clear()), tx.done]);
   }
-}
-
-/** Fill in any missing settings keys (forward-compatible with older backups). */
-export function normaliseSettings(input: Partial<Settings> | undefined | null): Settings {
-  const s = { ...DEFAULT_SETTINGS, ...(input ?? {}) } as Settings & { key?: string; showAges?: boolean };
-  delete s.key;
-  delete s.showAges; // removed in v2 of the data format; ignore it from older stores and backups
-  if (!s.defaultRecordView || !s.defaultRecordView.sort) s.defaultRecordView = { ...DEFAULT_SETTINGS.defaultRecordView };
-  if (!Array.isArray(s.termDates)) s.termDates = [];
-  s.labels = normaliseLabels(s.labels);
-  if (typeof s.backupReminderDays !== 'number' || s.backupReminderDays < 1) s.backupReminderDays = DEFAULT_SETTINGS.backupReminderDays;
-  return s;
 }
 
 export const db: DataStore = new IndexedDbStore();

@@ -1,5 +1,5 @@
 import { L, sortedChildren } from '../store';
-import { cssHex } from '../lib/palette';
+import { cssHex } from '../core/palette';
 import { Avatar } from './Avatar';
 
 type Props = {

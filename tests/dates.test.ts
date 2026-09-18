@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addDays, addMonths, daysBetween, inRange, isValidIsoDate, monthsInRange, parseIso, previousRange, rangeFor, todayIso } from '../src/lib/dates';
+import { addDays, addMonths, daysBetween, inRange, isValidIsoDate, monthsInRange, parseIso, previousRange, rangeFor, todayIso } from '../src/core/dates';
 
 const now = new Date(2026, 8, 15); // 15 Sep 2026, a Tuesday
 

@@ -33,9 +33,16 @@ export type Achievement = {
   templateVersion?: number;
   /** Shared by every record saved together in class mode. */
   batchId?: string;
+  /** Who created or last changed the record. Absent means the user. Set by the connector. */
+  source?: AchievementSource;
   createdAt: string;
   updatedAt: string;
 };
+
+export type AchievementSource = 'user' | 'claude';
+
+/** An earlier title pattern and body of a template, kept so old records can still be read by section. */
+export type TemplateRevision = { version: number; titlePattern: string; body: string; changedAt: string };
 
 export type Tag = {
   id: string;
@@ -62,6 +69,8 @@ export type Template = {
   suggestOnTag: boolean;
   /** Starts at 1; bumps only when titlePattern or body changes. */
   version: number;
+  /** Previous versions, oldest first. Absent when the template has never changed. */
+  history?: TemplateRevision[];
   /** Set when created from a starter template. */
   starterKey?: string;
   usageCount: number;

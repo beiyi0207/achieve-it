@@ -6,7 +6,7 @@ import { IconShuffle, IconUndo } from '../components/Icons';
 import { L, childById, toast, updateChild } from '../store';
 import { navigate } from '../router';
 import { getStyle, NONE, renderAvatarSvg, shuffleConfig, SLOT_ORDER, STYLES, switchStyle, type Slot, type SlotDef } from '../lib/avatar';
-import { AVATAR_BACKGROUNDS, cssHex } from '../lib/palette';
+import { AVATAR_BACKGROUNDS, cssHex } from '../core/palette';
 import type { AvatarConfig } from '../types';
 
 type Props = { childId: string };

@@ -5,9 +5,9 @@ import { TagChip } from '../components/TagChip';
 import { IconBack, IconEdit, IconPlus } from '../components/Icons';
 import { L, achievements, childById, childName, tagById } from '../store';
 import { back } from '../router';
-import { formatDate, monthKey, monthLabel } from '../lib/dates';
-import { cssHex, tagHex } from '../lib/palette';
-import { recordsHref } from '../lib/filters';
+import { formatDate, monthKey, monthLabel } from '../core/dates';
+import { cssHex, tagHex } from '../core/palette';
+import { recordsHref } from '../core/filters';
 import type { Achievement, Tag } from '../types';
 
 type Props = { childId: string };

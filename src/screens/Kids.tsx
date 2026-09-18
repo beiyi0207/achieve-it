@@ -7,7 +7,7 @@ import { ConfirmDialog } from '../components/Dialog';
 import { SwipeRow } from '../components/SwipeRow';
 import { IconAddPerson, IconChevron, IconSearch, IconX } from '../components/Icons';
 import { L, achievements, childName, removeChild, sortedChildren, toast } from '../store';
-import { monthKey, todayIso } from '../lib/dates';
+import { monthKey, todayIso } from '../core/dates';
 import type { Child } from '../types';
 
 export function KidsScreen() {

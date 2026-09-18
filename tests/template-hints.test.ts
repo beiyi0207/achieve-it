@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { appendNote, findHints, hasRealContent, hintAt, hintsToBackdropHtml, hintsToPreviewMarkdown, removeHints, stripHints } from '../src/lib/templateHints';
+import { appendNote, findHints, hasRealContent, hintAt, hintsToBackdropHtml, hintsToPreviewMarkdown, removeHints, stripHints } from '../src/core/templateHints';
 
 describe('findHints', () => {
   it('finds hints with their bounds', () => {

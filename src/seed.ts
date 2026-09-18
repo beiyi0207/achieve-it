@@ -1,8 +1,8 @@
 import type { Achievement, Child, DataSnapshot, Tag } from './types';
 import { DEFAULT_SETTINGS } from './types';
-import { addDays, isoNow, todayIso } from './lib/dates';
+import { addDays, isoNow, todayIso } from './core/dates';
 import { randomConfig } from './lib/avatar';
-import { seededRandom, uuid } from './lib/ids';
+import { seededRandom, uuid } from './core/ids';
 
 /** Deterministic sample data for development. Never used in production builds. */
 export function buildSeed(now = new Date()): DataSnapshot {

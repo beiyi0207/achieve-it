@@ -1,5 +1,5 @@
 import type { Tag } from '../types';
-import { tagHex } from '../lib/palette';
+import { tagHex } from '../core/palette';
 import { IconX } from './Icons';
 
 type Props = {

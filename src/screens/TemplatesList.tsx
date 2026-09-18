@@ -7,7 +7,7 @@ import { TagChip } from '../components/TagChip';
 import { TemplateTile } from '../components/TemplateIcons';
 import { IconBack, IconChevron, IconPlus } from '../components/Icons';
 import { addTag, addTemplate, removeTemplate, sortedTemplates, tagById, templates, toast } from '../store';
-import { STARTER_TEMPLATES, bodyOutline, type StarterTemplate } from '../lib/starterTemplates';
+import { STARTER_TEMPLATES, bodyOutline, type StarterTemplate } from '../core/starterTemplates';
 import type { Template } from '../types';
 
 export function TemplatesListScreen() {

@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'preact/hooks';
 import { applyFormat, renderMarkdown, type FormatKind } from '../lib/markdown';
-import { hintAt, hintsToBackdropHtml } from '../lib/templateHints';
+import { hintAt, hintsToBackdropHtml } from '../core/templateHints';
 import { SegmentedControl } from './SegmentedControl';
 
 type Props = {

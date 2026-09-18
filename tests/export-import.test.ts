@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildBackup, buildCsv, DEFAULT_EXPORT, exportFilename } from '../src/lib/export';
-import { mergeSnapshots, parseBackup } from '../src/lib/import';
+import { buildBackup, buildCsv, DEFAULT_EXPORT, exportFilename, mergeSnapshots, parseBackup } from '../src/core/backup';
 import { DEFAULT_SETTINGS, type Achievement, type Child, type DataSnapshot, type Tag, type Template } from '../src/types';
 
 const kid = (id: string, first: string): Child => ({
@@ -72,7 +71,8 @@ describe('buildBackup', () => {
     expect(b.children.map((c) => c.id)).toEqual(['a']);
     expect(b.achievements.map((a) => a.id)).toEqual(['1']);
     expect(b.tags.map((t) => t.id)).toEqual(['t1']);
-    expect(b.settings).toBeUndefined();
+    // Settings always travel, even in a partial export: readers need labels and term dates.
+    expect(b.settings?.labels).toEqual(DEFAULT_SETTINGS.labels);
   });
 
   it('can omit avatars', () => {
@@ -145,6 +145,27 @@ describe('parseBackup', () => {
     expect(p.data.templates[0]).toMatchObject({ tagIds: ['t1'], version: 1, usageCount: 0, suggestOnTag: true, icon: 'template', body: '' });
   });
 
+  it('keeps source and template history', () => {
+    const p = parseBackup(
+      JSON.stringify({
+        app: 'achieve-it',
+        version: 2,
+        children: [],
+        achievements: [
+          { id: 'r1', childId: 'c', title: 'T', date: '2026-01-02', source: 'claude' },
+          { id: 'r2', childId: 'c', title: 'T', date: '2026-01-02', source: 'robot' },
+        ],
+        tags: [],
+        templates: [{ id: 't', name: 'T', version: 2, history: [{ version: 1, titlePattern: 'Old {x}', body: 'old', changedAt: '2026-01-01T00:00:00.000Z' }, { bad: true }] }],
+      }),
+    );
+    expect(p.ok).toBe(true);
+    if (!p.ok) return;
+    expect(p.data.achievements[0].source).toBe('claude');
+    expect('source' in p.data.achievements[1]).toBe(false);
+    expect(p.data.templates[0].history).toEqual([{ version: 1, titlePattern: 'Old {x}', body: 'old', changedAt: '2026-01-01T00:00:00.000Z' }]);
+  });
+
   it('rejects non-backups', () => {
     expect(parseBackup('not json').ok).toBe(false);
     expect(parseBackup('{"foo":1}').ok).toBe(false);
@@ -163,6 +184,7 @@ describe('parseBackup', () => {
     expect(p.ok).toBe(true);
     if (!p.ok) return;
     expect(p.data.children[0].avatar.style).toBe('lorelei');
+    expect(p.data.children[0].avatar.background).toBeTruthy();
     expect('age' in p.data.children[0]).toBe(false);
     expect(p.data.achievements[0].tags).toEqual([]);
   });

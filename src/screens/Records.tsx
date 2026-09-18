@@ -8,9 +8,9 @@ import { Dialog } from '../components/Dialog';
 import { IconCheck, IconChevron, IconFilter, IconSearch, IconSort, IconX } from '../components/Icons';
 import { L, achievements, childById, childName, settings, sortedChildren, sortedTags, sortedTemplates, tagById, templateById } from '../store';
 import { navigate, useRoute } from '../router';
-import { NO_TEMPLATE, filterAchievements, groupAchievements, queryFromView, sortAchievements, viewFromQuery, type RecordFilter, type RecordView } from '../lib/filters';
+import { NO_TEMPLATE, filterAchievements, groupAchievements, queryFromView, sortAchievements, viewFromQuery, type RecordFilter, type RecordView } from '../core/filters';
 import { TemplateTile } from '../components/TemplateIcons';
-import { formatDate, type RangePreset } from '../lib/dates';
+import { formatDate, type RangePreset } from '../core/dates';
 import type { GroupBy, SortDirection, SortKey } from '../types';
 
 const RANGE_LABELS: Record<RangePreset, string> = {
@@ -63,6 +63,7 @@ export function RecordsScreen() {
       onClear: () => setFilter({ templateIds: f.templateIds.filter((x) => x !== id) }),
     })),
     ...(f.batchId ? [{ key: 'batch', label: 'Class record', onClear: () => setFilter({ batchId: undefined }) }] : []),
+    ...(f.source ? [{ key: 'source', label: f.source === 'claude' ? 'Added by Claude' : 'Added by me', onClear: () => setFilter({ source: undefined }) }] : []),
     ...(f.range !== 'all'
       ? [
           {
@@ -117,7 +118,7 @@ export function RecordsScreen() {
               <button
                 type="button"
                 class="chip"
-                onClick={() => setFilter({ childIds: [], tagIds: [], templateIds: [], batchId: undefined, range: 'all', from: undefined, to: undefined })}
+                onClick={() => setFilter({ childIds: [], tagIds: [], templateIds: [], batchId: undefined, source: undefined, range: 'all', from: undefined, to: undefined })}
               >
                 Clear all
               </button>
@@ -285,6 +286,22 @@ export function RecordsScreen() {
           </>
         )}
 
+        {all.some((a) => a.source === 'claude') && (
+          <>
+            <h2>Source</h2>
+            <div class="chip-row">
+              <button
+                type="button"
+                class={`chip ${f.source === 'claude' ? 'chip--active' : ''}`}
+                aria-pressed={f.source === 'claude'}
+                onClick={() => setFilter({ source: f.source === 'claude' ? undefined : 'claude' })}
+              >
+                Added by Claude
+              </button>
+            </div>
+          </>
+        )}
+
         <h2>Dates</h2>
         <div class="chip-row">
           {(['week', 'month', 'term', 'year', 'all', 'custom'] as RangePreset[]).map((r) => {
@@ -327,7 +344,7 @@ export function RecordsScreen() {
           <button
             type="button"
             class="btn btn--ghost"
-            onClick={() => setFilter({ childIds: [], tagIds: [], templateIds: [], batchId: undefined, range: 'all', from: undefined, to: undefined })}
+            onClick={() => setFilter({ childIds: [], tagIds: [], templateIds: [], batchId: undefined, source: undefined, range: 'all', from: undefined, to: undefined })}
           >
             Clear
           </button>

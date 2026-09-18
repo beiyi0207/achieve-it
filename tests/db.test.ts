@@ -1,7 +1,8 @@
 import 'fake-indexeddb/auto';
 import { openDB } from 'idb';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { IndexedDbStore, normaliseSettings } from '../src/db';
+import { IndexedDbStore } from '../src/db';
+import { normaliseSettings } from '../src/core/settings';
 import { DEFAULT_SETTINGS, type Achievement, type Child, type Tag, type Template } from '../src/types';
 
 const child = (id: string): Child => ({

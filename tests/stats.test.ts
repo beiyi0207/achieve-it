@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeStats, monthRange } from '../src/lib/stats';
+import { computeStats, monthRange } from '../src/core/stats';
 import type { Achievement, Child, Tag } from '../src/types';
 
 const kid = (id: string, first: string): Child => ({

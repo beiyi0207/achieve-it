@@ -1,6 +1,6 @@
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
-import { hintsToPreviewMarkdown } from './templateHints';
+import { hintsToPreviewMarkdown } from '../core/templateHints';
 
 marked.use({ gfm: true, breaks: true });
 

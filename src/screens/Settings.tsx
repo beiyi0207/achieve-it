@@ -4,10 +4,10 @@ import { ConfirmDialog, Dialog } from '../components/Dialog';
 import { SegmentedControl } from '../components/SegmentedControl';
 import { IconChevron } from '../components/Icons';
 import { L, achievements, children, eraseAllData, replaceAllData, settings, snapshot, tags, templates, toast, updateSettings } from '../store';
-import { daysSince } from '../lib/dates';
+import { daysSince } from '../core/dates';
 import { mergeSnapshots, parseBackup, readFileText } from '../lib/import';
 import { installAvailable, installed, isIosSafari, promptInstall } from '../lib/install';
-import { LABEL_MAX, LABEL_PRESETS, normaliseLabels } from '../lib/labels';
+import { LABEL_MAX, LABEL_PRESETS, normaliseLabels } from '../core/labels';
 import { ExportSheet } from './ExportSheet';
 import type { Appearance, DataSnapshot, GroupBy, SortDirection, SortKey } from '../types';
 

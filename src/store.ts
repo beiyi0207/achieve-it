@@ -1,10 +1,10 @@
 import { computed, effect, signal } from '@preact/signals';
 import { db as defaultDb, type DataStore } from './db';
 import { DEFAULT_SETTINGS, type Achievement, type Child, type DataSnapshot, type Settings, type Tag, type Template } from './types';
-import { uuid } from './lib/ids';
-import { isoNow } from './lib/dates';
-import { nextTagColor } from './lib/palette';
-import { makeLabels } from './lib/labels';
+import { uuid } from './core/ids';
+import { isoNow } from './core/dates';
+import { nextTagColor } from './core/palette';
+import { makeLabels } from './core/labels';
 
 let store: DataStore = defaultDb;
 
@@ -194,7 +194,11 @@ export async function addTemplate(input: TemplateInput): Promise<Template> {
 export async function updateTemplate(t: Template): Promise<Template> {
   const prev = templateById.value.get(t.id);
   const contentChanged = !!prev && (prev.titlePattern !== t.titlePattern || prev.body !== t.body);
-  const next: Template = { ...t, name: t.name.trim(), version: contentChanged ? t.version + 1 : t.version, updatedAt: isoNow() };
+  const now = isoNow();
+  const history = contentChanged && prev
+    ? [...(prev.history ?? []), { version: prev.version, titlePattern: prev.titlePattern, body: prev.body, changedAt: now }]
+    : t.history;
+  const next: Template = { ...t, name: t.name.trim(), version: contentChanged ? t.version + 1 : t.version, history, updatedAt: now };
   await store.putTemplate(next);
   templates.value = templates.value.map((x) => (x.id === t.id ? next : x));
   return next;
@@ -208,7 +212,7 @@ export async function removeTemplate(id: string): Promise<void> {
 export async function duplicateTemplate(id: string): Promise<Template | undefined> {
   const src = templateById.value.get(id);
   if (!src) return undefined;
-  const { id: _id, version: _v, usageCount: _u, lastUsedAt: _l, createdAt: _c, updatedAt: _up, starterKey: _s, ...rest } = src;
+  const { id: _id, version: _v, usageCount: _u, lastUsedAt: _l, createdAt: _c, updatedAt: _up, starterKey: _s, history: _h, ...rest } = src;
   return addTemplate({ ...rest, name: uniqueTemplateName(`${src.name} copy`) });
 }
 

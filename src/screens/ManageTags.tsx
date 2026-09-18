@@ -5,7 +5,7 @@ import { TagChip } from '../components/TagChip';
 import { EmptyState } from '../components/EmptyState';
 import { IconBack, IconChevron } from '../components/Icons';
 import { achievements, findTagByName, mergeTags, removeTag, sortedTags, toast, updateTag } from '../store';
-import { TAG_PALETTE } from '../lib/palette';
+import { TAG_PALETTE } from '../core/palette';
 import type { Tag } from '../types';
 
 export function ManageTagsScreen() {

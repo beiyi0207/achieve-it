@@ -24,11 +24,11 @@ import {
   updateAchievement,
 } from '../store';
 import { back, navigate, useRoute } from '../router';
-import { formatDate, isValidIsoDate, todayIso } from '../lib/dates';
-import { uuid } from '../lib/ids';
-import { appendNote, hasRealContent, stripHints } from '../lib/templateHints';
-import { customTokens, hasTokens, resolveTitle, tokenDate, tokenLabel } from '../lib/templateTokens';
-import { bodyOutline } from '../lib/starterTemplates';
+import { formatDate, isValidIsoDate, todayIso } from '../core/dates';
+import { uuid } from '../core/ids';
+import { appendNote, hasRealContent, stripHints } from '../core/templateHints';
+import { customTokens, hasTokens, resolveTitle, tokenDate, tokenLabel } from '../core/templateTokens';
+import { bodyOutline } from '../core/starterTemplates';
 import type { Template } from '../types';
 
 type Props = { achievementId?: string };
@@ -229,7 +229,9 @@ export function AchievementEditorScreen({ achievementId }: Props) {
     try {
       const cleanDescription = stripHints(description);
       if (existing) {
-        await updateAchievement({ ...existing, title: title.trim(), date, tags: tagIds, description: cleanDescription, childId: childIds[0] });
+        // An edit here is the user's, so it takes the record back from Claude ("source" is who last changed it).
+        const { source: _source, ...rest } = existing;
+        await updateAchievement({ ...rest, title: title.trim(), date, tags: tagIds, description: cleanDescription, childId: childIds[0] });
         toast('Achievement updated');
         navigate(`/records/${existing.id}`, { replace: true });
         return;

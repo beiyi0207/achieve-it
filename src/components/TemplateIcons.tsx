@@ -1,5 +1,5 @@
 import type { Template } from '../types';
-import { tagHex } from '../lib/palette';
+import { tagHex } from '../core/palette';
 
 /**
  * Curated icon set for templates, drawn in the same 24px stroke style as Icons.tsx.

@@ -7,8 +7,8 @@ import { DEFAULT_TEMPLATE_ICON, TEMPLATE_ICONS, TemplateIcon, TemplateTile, temp
 import { IconCopy } from '../components/Icons';
 import { addTemplate, duplicateTemplate, findTemplateByName, removeTemplate, templateById, templates, toast, updateTemplate } from '../store';
 import { navigate } from '../router';
-import { TAG_PALETTE, nextTagColor } from '../lib/palette';
-import { customTokens } from '../lib/templateTokens';
+import { TAG_PALETTE, nextTagColor } from '../core/palette';
+import { customTokens } from '../core/templateTokens';
 
 type Props = { templateId?: string };
 

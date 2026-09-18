@@ -3,8 +3,8 @@ import * as lorelei from '@dicebear/lorelei';
 import * as notionists from '@dicebear/notionists';
 import * as openPeeps from '@dicebear/open-peeps';
 import type { AvatarConfig } from '../types';
-import { AVATAR_BACKGROUNDS, HAIR_COLORS, SKIN_COLORS } from './palette';
-import { seededRandom } from './ids';
+import { AVATAR_BACKGROUNDS, HAIR_COLORS, SKIN_COLORS } from '../core/palette';
+import { seededRandom } from '../core/ids';
 
 export type Slot = 'skin' | 'hair' | 'hairColor' | 'eyes' | 'mouth' | 'extras';
 export const SLOT_ORDER: Slot[] = ['skin', 'hair', 'hairColor', 'eyes', 'mouth', 'extras'];

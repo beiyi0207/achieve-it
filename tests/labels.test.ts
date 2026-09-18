@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { LABEL_MAX, makeLabels, normaliseLabels } from '../src/lib/labels';
-import { normaliseSettings } from '../src/db';
+import { LABEL_MAX, makeLabels, normaliseLabels } from '../src/core/labels';
+import { normaliseSettings } from '../src/core/settings';
 
 describe('labels', () => {
   it('defaults to kid/kids', () => {

@@ -1,4 +1,4 @@
-import type { Achievement, Child, GroupBy, Settings, SortDirection, SortKey, Tag, TermDate } from '../types';
+import type { Achievement, AchievementSource, Child, GroupBy, Settings, SortDirection, SortKey, Tag, TermDate } from '../types';
 import { inRange, monthKey, monthLabel, rangeFor, type DateRange, type RangePreset } from './dates';
 import { cssHex, tagHex } from './palette';
 
@@ -13,6 +13,8 @@ export type RecordFilter = {
   templateIds: string[];
   /** Records saved together in class mode. Reached from a record's "See all" link, not the filter sheet. */
   batchId?: string;
+  /** Only records created by this source ("user" matches records with no source). */
+  source?: AchievementSource;
   range: RangePreset;
   from?: string;
   to?: string;
@@ -34,7 +36,7 @@ export type FilterContext = {
 export const EMPTY_FILTER: RecordFilter = { q: '', childIds: [], tagIds: [], templateIds: [], range: 'all' };
 
 export function isFilterActive(f: RecordFilter): boolean {
-  return f.q.trim() !== '' || f.childIds.length > 0 || f.tagIds.length > 0 || f.templateIds.length > 0 || !!f.batchId || f.range !== 'all';
+  return f.q.trim() !== '' || f.childIds.length > 0 || f.tagIds.length > 0 || f.templateIds.length > 0 || !!f.batchId || !!f.source || f.range !== 'all';
 }
 
 export function resolveRange(f: RecordFilter, ctx: Pick<FilterContext, 'terms' | 'now'>): DateRange | null {
@@ -52,6 +54,7 @@ export function filterAchievements(list: Achievement[], f: RecordFilter, ctx: Fi
     if (tags && !a.tags.some((t) => tags.has(t))) return false;
     if (tpls && !tpls.has(a.templateId ?? NO_TEMPLATE)) return false;
     if (f.batchId && a.batchId !== f.batchId) return false;
+    if (f.source && (a.source ?? 'user') !== f.source) return false;
     if (!inRange(a.date, range)) return false;
     if (q && !a.title.toLowerCase().includes(q) && !a.description.toLowerCase().includes(q)) return false;
     return true;
@@ -158,6 +161,7 @@ export function viewFromQuery(q: URLSearchParams, settings: Settings): RecordVie
       tagIds: list('tag'),
       templateIds: list('template'),
       batchId: q.get('batch') || undefined,
+      source: q.get('source') === 'claude' ? 'claude' : q.get('source') === 'user' ? 'user' : undefined,
       range: range && RANGES.includes(range) ? range : 'all',
       from: q.get('from') ?? undefined,
       to: q.get('to') ?? undefined,
@@ -177,6 +181,7 @@ export function queryFromView(v: RecordView, settings: Settings): URLSearchParam
   if (v.filter.tagIds.length) q.set('tag', v.filter.tagIds.join(','));
   if (v.filter.templateIds.length) q.set('template', v.filter.templateIds.join(','));
   if (v.filter.batchId) q.set('batch', v.filter.batchId);
+  if (v.filter.source) q.set('source', v.filter.source);
   if (v.filter.range !== 'all') q.set('range', v.filter.range);
   if (v.filter.range === 'custom') {
     if (v.filter.from) q.set('from', v.filter.from);
@@ -195,6 +200,7 @@ export function recordsHref(partial: Partial<RecordFilter> & { group?: GroupBy }
   if (partial.tagIds?.length) q.set('tag', partial.tagIds.join(','));
   if (partial.templateIds?.length) q.set('template', partial.templateIds.join(','));
   if (partial.batchId) q.set('batch', partial.batchId);
+  if (partial.source) q.set('source', partial.source);
   if (partial.range && partial.range !== 'all') q.set('range', partial.range);
   if (partial.from) q.set('from', partial.from);
   if (partial.to) q.set('to', partial.to);

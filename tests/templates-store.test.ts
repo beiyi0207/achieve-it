@@ -41,10 +41,16 @@ describe('templates in the store', () => {
     expect(next.version).toBe(2);
     next = await updateTemplate({ ...next, titlePattern: 'Read {book} by {author}' });
     expect(next.version).toBe(3);
+    // Each content change files the previous version away, oldest first.
+    expect(next.history?.map((h) => [h.version, h.titlePattern, h.body])).toEqual([
+      [1, 'Read {book}', '## Book\n[[title]]'],
+      [2, 'Read {book}', '## Book\n[[title and author]]'],
+    ]);
 
     const copy = await duplicateTemplate(t.id);
     expect(copy?.name).toBe('Reading copy');
     expect(copy?.version).toBe(1);
+    expect(copy?.history).toBeUndefined();
     expect(copy?.body).toBe(next.body);
     expect(uniqueTemplateName('reading')).toBe('reading 2');
 

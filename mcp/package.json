@@ -1,0 +1,18 @@
+{
+  "name": "achieve-it-mcp",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Local, file-based MCP server for the Achievement tracker: reads an exported backup, writes a changes file to import.",
+  "scripts": {
+    "start": "tsx server.ts",
+    "test": "tsx smoke.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.0"
+  }
+}

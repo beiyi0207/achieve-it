@@ -5,7 +5,7 @@ import { Avatar } from '../components/Avatar';
 import { IconDownload, IconShare } from '../components/Icons';
 import { L, settings, snapshot, sortedChildren, toast, updateSettings } from '../store';
 import { buildBackup, buildCsv, canShareFiles, DEFAULT_EXPORT, downloadFile, exportFilename, shareFile, type ExportOptions } from '../lib/export';
-import type { RangePreset } from '../lib/dates';
+import type { RangePreset } from '../core/dates';
 
 type Props = { open: boolean; onClose: () => void };
 
