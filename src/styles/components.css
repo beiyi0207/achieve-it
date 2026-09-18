@@ -1286,9 +1286,10 @@ dialog::backdrop {
 }
 
 /* ---------- Template hints in the markdown editor ---------- */
-/* Write mode: a styled backdrop sits under a transparent-text textarea so hints can be muted. */
+/* Write mode: a styled backdrop sits under a transparent-text textarea so hints can be muted.
+   Both share one grid cell; the backdrop is in flow and sets the height, the textarea stretches to it. */
 .md-write {
-  position: relative;
+  display: grid;
   background: var(--surface);
   border-radius: var(--radius);
 }
@@ -1303,24 +1304,24 @@ dialog::backdrop {
   overflow-wrap: anywhere;
   word-break: break-word;
   tab-size: 4;
+  grid-area: 1 / 1;
+  min-height: 160px;
+  box-sizing: border-box;
 }
 
 .md-backdrop {
-  position: absolute;
-  inset: 0;
   border: 1px solid transparent;
   color: var(--text);
   pointer-events: none;
-  overflow: hidden;
 }
 
 .textarea--hints {
-  position: relative;
   background: transparent;
   color: transparent;
   caret-color: var(--text);
   resize: none;
   overflow: hidden;
+  height: auto;
 }
 
 .textarea--hints::placeholder {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useMemo, useRef, useState } from 'preact/hooks';
 import { applyFormat, renderMarkdown, type FormatKind } from '../lib/markdown';
 import { hintAt, hintsToBackdropHtml } from '../lib/templateHints';
 import { SegmentedControl } from './SegmentedControl';
@@ -31,16 +31,11 @@ export function MarkdownEditor({ value, onChange, placeholder, id, hints = false
   const [mode, setMode] = useState<'write' | 'preview'>('write');
   const ref = useRef<HTMLTextAreaElement>(null);
   const html = useMemo(() => (mode === 'preview' ? renderMarkdown(value, { hints }) : ''), [mode, value, hints]);
-  const backdrop = useMemo(() => (hints && mode === 'write' ? hintsToBackdropHtml(value) + '\n' : ''), [hints, mode, value]);
+  // The backdrop is in normal flow and sizes the editor, so the textarea never has to be
+  // measured or resized (which would collapse it for a moment and jump the page scroll).
+  // The trailing space keeps a final empty line the same height as in the textarea.
+  const backdrop = useMemo(() => (hints && mode === 'write' ? hintsToBackdropHtml(value) + ' ' : ''), [hints, mode, value]);
   const tools = hintTool ? [...TOOLS, HINT_TOOL] : TOOLS;
-
-  // With a backdrop the textarea must not scroll on its own, so it grows with its content.
-  useEffect(() => {
-    const ta = ref.current;
-    if (!hints || !ta) return;
-    ta.style.height = 'auto';
-    ta.style.height = `${Math.max(ta.scrollHeight, 160)}px`;
-  }, [hints, value, mode]);
 
   function format(kind: FormatKind) {
     const ta = ref.current;
